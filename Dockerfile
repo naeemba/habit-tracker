@@ -39,7 +39,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 3000
 # A fresh Postgres has no tables, and `node server.js` bypasses npm scripts,
-# so the migrate step has to run here. `next-starter migrate` is idempotent,
-# so steady-state deploys take a no-op hit. The CLI and its migrations reach
-# the image through the runtimePeers list in next.config.ts.
-CMD ["sh", "-c", "node node_modules/@naeemba/next-starter/bin/cli.mjs migrate && exec node server.js"]
+# so the migrate step has to run here. Two tracks, auth first because this
+# app's tables may reference `user(id)`. Both are idempotent, so steady-state
+# deploys take a no-op hit. The CLI, its migrations, and this app's own
+# migrations reach the image through the include lists in next.config.ts.
+CMD ["sh", "-c", "node node_modules/@naeemba/next-starter/bin/cli.mjs migrate && node scripts/migrate.mjs && exec node server.js"]

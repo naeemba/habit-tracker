@@ -72,6 +72,29 @@ Without this the first deploy against an empty database looks healthy — `/`
 returns 200 — and then the first sign-in fails with `relation "user" does not
 exist`, with no CLI on disk to fix it by hand.
 
+### Two tracks, not one
+
+The starter owns the auth tables and journals them in
+`__next_starter_migrations`. This app's own tables are a second, independent
+track: `drizzle.config.ts` and `drizzle-kit generate` write the SQL into
+`drizzle/`, and `scripts/migrate.mjs` applies it. The container's `CMD` runs
+the auth track first, then this one, then the server.
+
+- The script uses drizzle-orm's migrator rather than drizzle-kit. drizzle-kit
+  is a dev dependency and carries esbuild with it, so it is not in the
+  production image; drizzle-orm already is, because the closure drags it in.
+- `drizzle/` and `scripts/migrate.mjs` are on their own include list in
+  `next.config.ts`. No route imports either one, so the file tracer never sees
+  them, and an image without them repeats the trap one track along: `/` returns
+  200 and the first items page dies on `relation "items" does not exist`.
+- Locally, `npm run db:generate` after a schema change and `npm run db:migrate`
+  to apply both tracks.
+
+Pages that read these tables cannot be prerendered: the build image has no
+database, only the placeholder `DATABASE_URL`. `/items` sets
+`export const dynamic = "force-dynamic"` for that reason, and so must every
+page added later that reads at render time.
+
 ## Libraries to add
 
 | Need | Library |

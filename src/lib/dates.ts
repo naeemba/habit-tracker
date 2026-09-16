@@ -63,6 +63,16 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((parse(to) - parse(from)) / MILLISECONDS_PER_DAY)
 }
 
+/**
+ * A day number as the `weekdays` schedule writes them: 0 = Sunday, 6 =
+ * Saturday. Exported because the form that writes a schedule has to refuse
+ * exactly what the guards here would later throw on; two copies of the range
+ * would drift and let the form save a day that then reads as corrupt.
+ */
+export function isWeekday(day: number): boolean {
+  return Number.isInteger(day) && day >= 0 && day <= 6
+}
+
 /** 0 = Sunday, matching the `weekdays` schedule shape. */
 function dayOfWeek(localDate: string): number {
   return new Date(parse(localDate)).getUTCDay()
@@ -92,12 +102,24 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
  * number is as untrusted as a check-in date. A `0`, a missing field or a
  * `"three"` makes `isDue` false and `requiredToday` false on every day of
  * every week: the habit vanishes from Today and stops costing the bonus, with
- * nothing thrown and nothing logged. Both readers go through here because
+ * nothing thrown and nothing logged. Both Today readers go through here because
  * `requiredToday` returns early for `per_week` and never reaches `isDue`.
  */
-function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number {
+export function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number {
   if (!(schedule.count > 0)) throw new RangeError(`Times per week must be at least one: ${schedule.count}`)
   return schedule.count
+}
+
+/**
+ * The interval, guarded. Twin of `weeklyCount`, for the same untrusted jsonb:
+ * a row with no `days` prints `Every undefined days since last done` on the
+ * list, and a `0` prints `Every 0 days since last done` as if it were a real
+ * schedule while the Today view throws on it. `dueness` rejects the same
+ * values for the day it is asked about.
+ */
+export function intervalDays(schedule: Extract<Schedule, { type: "interval" }>): number {
+  if (!(schedule.days > 0)) throw new RangeError(`Interval must be at least one day: ${schedule.days}`)
+  return schedule.days
 }
 
 /**
@@ -111,9 +133,8 @@ function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number 
  * the habit disappear from Today for good, with nothing thrown and nothing
  * logged — the same failure a bare `Array.isArray` was written to stop.
  */
-function weekdayList(schedule: Extract<Schedule, { type: "weekdays" }>): number[] {
+export function weekdayList(schedule: Extract<Schedule, { type: "weekdays" }>): number[] {
   const days = schedule.days
-  const isWeekday = (day: number) => Number.isInteger(day) && day >= 0 && day <= 6
   if (!Array.isArray(days) || days.length === 0 || !days.every(isWeekday)) {
     throw new RangeError(`Weekdays must be a non-empty list of days 0-6: ${JSON.stringify(days)}`)
   }
