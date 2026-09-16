@@ -57,9 +57,8 @@ function resolvePackageDirectory(name: string, fromDirectory: string) {
     // parent directory or in $HOME — becomes a `./../..` glob that resolves
     // outside the tracing root and matches nothing, so the package would
     // silently not ship. Treating it as missing lets the throw below name it.
-    const parent = dirname(directory)
-    if (directory === projectRoot || parent === directory) return undefined
-    directory = parent
+    if (directory === projectRoot) return undefined
+    directory = dirname(directory)
   }
 }
 
