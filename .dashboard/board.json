@@ -70,12 +70,6 @@
           "priority": "medium"
         },
         {
-          "id": "33a40ced-5e25-4f58-a812-9bfd76b02d58",
-          "title": "Dates module: one place for day boundaries",
-          "notes": "Single module that turns a UTC instant into local_date using the timezone setting, and lists which items are due on a date. Nothing else does date maths. docs/research.md section 6.",
-          "priority": "high"
-        },
-        {
           "id": "c5d5c10b-e3af-49d4-b39f-fa0e587fc725",
           "title": "Chore dueness and Today sort order",
           "notes": "dueness = daysSinceLastDone / intervalDays. Overdue chores first, then due habits, then done items. Show a green-to-red hint per chore.",
@@ -115,7 +109,14 @@
     },
     {
       "name": "Doing",
-      "cards": []
+      "cards": [
+        {
+          "id": "33a40ced-5e25-4f58-a812-9bfd76b02d58",
+          "title": "Dates module: one place for day boundaries",
+          "notes": "Single module that turns a UTC instant into local_date using the timezone setting, and lists which items are due on a date. Nothing else does date maths. docs/research.md section 6.",
+          "priority": "high"
+        }
+      ]
     },
     {
       "name": "Done",

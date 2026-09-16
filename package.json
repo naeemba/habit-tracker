@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.12"
+    "node": ">=22.18"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate": "node --env-file-if-exists=.env node_modules/.bin/next-starter migrate"
+    "db:migrate": "node --env-file-if-exists=.env node_modules/.bin/next-starter migrate",
+    "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@better-auth/passkey": "^1.7.5",
