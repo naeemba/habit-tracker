@@ -95,13 +95,18 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
 export type DueContext = {
   /** Last local date this item was checked off, null if never. */
   lastDoneDate: string | null
-  /** Check-ins already logged in the week containing the date. */
-  doneThisWeek: number
+  /**
+   * Check-ins logged in the week containing the date, before that date.
+   * Today's own check-ins are left out so a `per_week` habit keeps its row on
+   * the day it is tapped; see `dueItems` for why.
+   */
+  doneEarlierThisWeek: number
 }
 
 /**
  * Whether an item wants doing on a given local date.
- * A `per_week` habit stays due every day until the week's count is met.
+ * A `per_week` habit stays due every day until the week's count is met by
+ * earlier days, so the last tap of the week does not remove the row under it.
  */
 export function isDue(schedule: Schedule, localDate: string, context: DueContext): boolean {
   switch (schedule.type) {
@@ -110,7 +115,7 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
     case "weekdays":
       return schedule.days.includes(dayOfWeek(localDate))
     case "per_week":
-      return context.doneThisWeek < schedule.count
+      return context.doneEarlierThisWeek < schedule.count
     case "interval":
       return dueness(context.lastDoneDate, localDate, schedule.days) >= 1
   }
@@ -119,9 +124,9 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
 /**
  * The items due on a local date, given every check-in for them.
  *
- * Callers pass raw check-ins and get a list back; deriving "last done" and
- * "done this week" happens here so the Today view, the daily bonus, the badge
- * count and the reminder scheduler cannot each invent their own week window.
+ * Callers pass raw check-ins and get a list back; deriving "last done" and the
+ * week count happens here so the Today view, the daily bonus, the badge count
+ * and the reminder scheduler cannot each invent their own week window.
  *
  * Doing an item today does not mean the same thing for both types. An
  * `interval` chore drops out of the list the moment it is done, because its
@@ -129,6 +134,12 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
  * list after being done today, because its schedule does not move; the Today
  * view needs it listed so the checkmark has a row to sit on. Callers that want
  * "still outstanding" must subtract today's check-ins themselves.
+ *
+ * That is why the week count below stops at the day before. A gym habit of 3
+ * per week done Monday and Tuesday is due on Wednesday; counting Wednesday's
+ * own tap would delete the row on the tap that made it, leaving nothing to
+ * untap after a mistap. It drops out on Thursday, when the three are all
+ * earlier days.
  */
 export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
   items: ItemType[],
@@ -137,7 +148,7 @@ export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
 ): ItemType[] {
   const firstDayOfWeek = weekStart(localDate)
   const lastDoneDates = new Map<string, string>()
-  const weeklyCounts = new Map<string, number>()
+  const earlierWeeklyCounts = new Map<string, number>()
 
   for (const checkIn of checkIns) {
     // These are compared as strings, and a malformed one compares wrong rather
@@ -149,15 +160,15 @@ export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
     if (lastDoneDate === undefined || checkIn.localDate > lastDoneDate) {
       lastDoneDates.set(checkIn.itemId, checkIn.localDate)
     }
-    if (checkIn.localDate >= firstDayOfWeek) {
-      weeklyCounts.set(checkIn.itemId, (weeklyCounts.get(checkIn.itemId) ?? 0) + 1)
+    if (checkIn.localDate >= firstDayOfWeek && checkIn.localDate < localDate) {
+      earlierWeeklyCounts.set(checkIn.itemId, (earlierWeeklyCounts.get(checkIn.itemId) ?? 0) + 1)
     }
   }
 
   return items.filter(item =>
     isDue(item.schedule, localDate, {
       lastDoneDate: lastDoneDates.get(item.id) ?? null,
-      doneThisWeek: weeklyCounts.get(item.id) ?? 0,
+      doneEarlierThisWeek: earlierWeeklyCounts.get(item.id) ?? 0,
     }),
   )
 }

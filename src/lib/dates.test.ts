@@ -2,7 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import { addDays, daysBetween, dueItems, dueness, isDue, toLocalDate } from "./dates.ts"
 
-const noHistory = { lastDoneDate: null, doneThisWeek: 0 }
+const noHistory = { lastDoneDate: null, doneEarlierThisWeek: 0 }
 
 test("a late-evening instant belongs to the next local day east of UTC", () => {
   const instant = new Date("2026-09-16T23:30:00Z")
@@ -36,8 +36,8 @@ test("habit schedules pick their days", () => {
   assert.equal(isDue({ type: "daily" }, "2026-09-16", noHistory), true)
   assert.equal(isDue({ type: "weekdays", days: [1, 3, 5] }, "2026-09-16", noHistory), true)
   assert.equal(isDue({ type: "weekdays", days: [1, 3, 5] }, "2026-09-17", noHistory), false)
-  assert.equal(isDue({ type: "per_week", count: 3 }, "2026-09-16", { lastDoneDate: null, doneThisWeek: 2 }), true)
-  assert.equal(isDue({ type: "per_week", count: 3 }, "2026-09-16", { lastDoneDate: null, doneThisWeek: 3 }), false)
+  assert.equal(isDue({ type: "per_week", count: 3 }, "2026-09-16", { lastDoneDate: null, doneEarlierThisWeek: 2 }), true)
+  assert.equal(isDue({ type: "per_week", count: 3 }, "2026-09-16", { lastDoneDate: null, doneEarlierThisWeek: 3 }), false)
 })
 
 test("dueItems derives last done and the week count from check-ins", () => {
@@ -74,15 +74,34 @@ test("doing an item today drops the chore from the list but keeps the habit", ()
   // has restarted its interval and is not wanted again for two days.
   const items = [
     { id: "pushups", schedule: { type: "daily" } as const },
+    { id: "gym", schedule: { type: "per_week", count: 3 } as const },
     { id: "dishes", schedule: { type: "interval", days: 2 } as const },
   ]
+  // Wednesday 2026-09-16. Gym was done Monday and Tuesday, so the tap today is
+  // the third of three: the week's count is met and the row must still be there.
   const checkIns = [
     { itemId: "pushups", localDate: "2026-09-16" },
+    { itemId: "gym", localDate: "2026-09-14" },
+    { itemId: "gym", localDate: "2026-09-15" },
+    { itemId: "gym", localDate: "2026-09-16" },
     { itemId: "dishes", localDate: "2026-09-16" },
   ]
 
   const due = dueItems(items, "2026-09-16", checkIns).map(item => item.id)
-  assert.deepEqual(due, ["pushups"])
+  assert.deepEqual(due, ["pushups", "gym"])
+})
+
+test("a per_week habit leaves the list the day after its count is met", () => {
+  const items = [{ id: "gym", schedule: { type: "per_week", count: 3 } as const }]
+  const checkIns = [
+    { itemId: "gym", localDate: "2026-09-14" },
+    { itemId: "gym", localDate: "2026-09-15" },
+    { itemId: "gym", localDate: "2026-09-16" },
+  ]
+
+  assert.deepEqual(dueItems(items, "2026-09-17", checkIns), [])
+  // Sunday 2026-09-20 starts a new week, so the count resets and gym is back.
+  assert.deepEqual(dueItems(items, "2026-09-20", checkIns).map(item => item.id), ["gym"])
 })
 
 test("bad input throws instead of quietly hiding an item forever", () => {
