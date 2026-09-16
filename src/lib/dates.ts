@@ -102,7 +102,7 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
  * number is as untrusted as a check-in date. A `0`, a missing field or a
  * `"three"` makes `isDue` false and `requiredToday` false on every day of
  * every week: the habit vanishes from Today and stops costing the bonus, with
- * nothing thrown and nothing logged. Both readers go through here because
+ * nothing thrown and nothing logged. Both Today readers go through here because
  * `requiredToday` returns early for `per_week` and never reaches `isDue`.
  */
 export function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number {
