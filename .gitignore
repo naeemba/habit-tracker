@@ -1,4 +1,31 @@
-node_modules/
-.env
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
 *.db
-dist/
+
+# debug
+npm-debug.log*
+
+# env files — the template is the one exception
+.env*
+!.env.example
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local tooling
+.codegraph/

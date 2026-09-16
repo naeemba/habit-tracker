@@ -1,0 +1,37 @@
+# Local development stack. Coolify runs the app container and its own Postgres
+# service, so this file is for the laptop only.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: habit
+      POSTGRES_PASSWORD: habit
+      POSTGRES_DB: habit_tracker
+    ports:
+      # 5432 on the development machine is taken by a native Postgres
+      # install, so this is published on 5435. Inside the compose network
+      # the app still reaches it on 5432. This is the one place that
+      # explains the port; .env.example and the README point here.
+      - "5435:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habit -d habit_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgres://habit:habit@db:5432/habit_tracker
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
+      BETTER_AUTH_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

@@ -54,6 +54,27 @@ costs only that day's bonus, never the points already earned.
 Social features, gamification beyond points, categories, penalties for
 missed days, multiple reward goals at once. Add when one is missed.
 
+## Development
+
+Needs Node 20.12+ (for `--env-file-if-exists`) and Docker.
+
+```bash
+cp .env.example .env          # then fill in BETTER_AUTH_SECRET
+docker compose up -d db       # Postgres on localhost:5435
+npm install
+npm run db:migrate            # creates the auth tables
+npm run dev                   # http://localhost:3000
+```
+
+Port 5435 rather than 5432 — `docker-compose.yml` says why.
+
+To run the app the way it is deployed, as a container against the same
+database:
+
+```bash
+docker compose up -d --build  # http://localhost:3000
+```
+
 ## Documents
 
 - [Research notes](docs/research.md) — what other apps do and the decisions taken.

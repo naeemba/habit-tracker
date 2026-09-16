@@ -25,3 +25,5 @@ an alternative.
   in `.env.example`.
 - Work is tracked in `.dashboard/board.json`. Move a card to Doing before
   the first edit, to Done when the PR is ready.
+- No semicolons in TypeScript or config files. Nothing enforces it yet; add
+  Prettier with `"semi": false` when the repo gets a CI job to hang it on.

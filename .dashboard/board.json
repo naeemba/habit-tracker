@@ -123,7 +123,7 @@
         {
           "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
           "title": "Scaffold project on next-starter with Postgres",
-          "notes": "Shipped in PR #1 (scaffold-next-starter). Next 16 on @naeemba/next-starter, Postgres via docker-compose on port 5435, auth migrations through npm run db:migrate, Dockerfile with standalone output running non-root. Home page, sign-in and the auth API all verified in Docker from a clean build.\n\nTwo starter quirks worked around and recorded in docs/stack.md: build-time env validation, and optional peers the file tracer cannot see.",
+          "notes": "Shipped in PR #1 (scaffold-next-starter). Next 16 on @naeemba/next-starter, Postgres via docker-compose on port 5435, auth migrations through npm run db:migrate, Dockerfile with standalone output running non-root. Home page, sign-in and the auth API all verified in Docker from a clean build.\n\nTwo starter quirks worked around and recorded in docs/stack.md: build-time env validation, and optional peers the file tracer cannot see.\n\nReview fixes from PR #1 folded in.",
           "priority": "high"
         }
       ]

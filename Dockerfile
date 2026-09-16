@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1
+
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+# The auth module validates its env at import time, and `next build` imports
+# it while collecting route config. These placeholders only satisfy that
+# check — they live in the builder stage and never reach the runtime image,
+# which reads the real values from the environment. None are NEXT_PUBLIC_*,
+# so nothing is baked into the client bundle.
+ENV DATABASE_URL=postgres://build:build@localhost:5432/build
+ENV BETTER_AUTH_SECRET=build-time-placeholder-never-used-at-runtime
+ENV BETTER_AUTH_URL=http://localhost:3000
+RUN --mount=type=cache,target=/app/.next/cache npm run build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+RUN addgroup -g 1001 -S nodejs && adduser -u 1001 -S nextjs -G nodejs
+
+# Standalone traces the server plus only the node_modules it actually needs.
+# static/ is not traced, so it is copied separately. There is no public/ copy:
+# the directory does not exist yet, and `COPY` fails the build on a missing
+# source. Add the line back with the first real public asset.
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3000
+# A fresh Postgres has no tables, and `node server.js` bypasses npm scripts,
+# so the migrate step has to run here. `next-starter migrate` is idempotent,
+# so steady-state deploys take a no-op hit. The CLI and its migrations reach
+# the image through the runtimePeers list in next.config.ts.
+CMD ["sh", "-c", "node node_modules/@naeemba/next-starter/bin/cli.mjs migrate && exec node server.js"]
