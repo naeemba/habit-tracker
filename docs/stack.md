@@ -53,6 +53,25 @@ Next. Familiarity wins for a personal app maintained for years.
     stage. The starter should skip validation when `NEXT_PHASE` says it is
     a production build.
 
+## Migrations on deploy
+
+The starter's README prescribes a `prestart` npm script for the auth
+migrations. A standalone image runs `node server.js` directly and never goes
+through npm, so the hook would never fire. The container's `CMD` runs
+`next-starter migrate` before the server instead. Two consequences worth
+knowing:
+
+- The CLI has to be *in* the image, and nothing in app code imports it, so
+  `@naeemba/next-starter` is on the `runtimePeers` list in `next.config.ts`
+  purely to drag `bin/` and `migrations/` through the file tracer.
+- `DATABASE_URL` must be set at container start, not just at build. Coolify
+  supplies it from the Postgres service; `docker-compose.yml` does the same
+  and waits on the database's healthcheck.
+
+Without this the first deploy against an empty database looks healthy — `/`
+returns 200 — and then the first sign-in fails with `relation "user" does not
+exist`, with no CLI on disk to fix it by hand.
+
 ## Libraries to add
 
 | Need | Library |

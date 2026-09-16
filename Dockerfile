@@ -37,4 +37,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 EXPOSE 3000
-CMD ["node", "server.js"]
+# A fresh Postgres has no tables, and `node server.js` bypasses npm scripts,
+# so the migrate step has to run here. `next-starter migrate` is idempotent,
+# so steady-state deploys take a no-op hit. The CLI and its migrations reach
+# the image through the runtimePeers list in next.config.ts.
+CMD ["sh", "-c", "node node_modules/@naeemba/next-starter/bin/cli.mjs migrate && exec node server.js"]
