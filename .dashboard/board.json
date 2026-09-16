@@ -115,18 +115,18 @@
     },
     {
       "name": "Doing",
+      "cards": []
+    },
+    {
+      "name": "Done",
       "cards": [
         {
           "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
           "title": "Scaffold project on next-starter with Postgres",
-          "notes": "Decision made, see docs/stack.md. Install @naeemba/next-starter, run its init, point DATABASE_URL at a local Postgres, add Dockerfile with standalone output. Hello page runs in Docker.",
+          "notes": "Shipped in PR #1 (scaffold-next-starter): Next.js on @naeemba/next-starter with Postgres, better-auth sign-in plus passkeys, a standalone Docker image that migrates on boot, and docker compose for local runs. Review fixes folded in.",
           "priority": "high"
         }
       ]
-    },
-    {
-      "name": "Done",
-      "cards": []
     }
   ]
 }
