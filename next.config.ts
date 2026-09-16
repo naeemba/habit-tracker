@@ -90,7 +90,14 @@ function dependencyClosure(roots: string[]): string[] {
   )
 }
 
-const runtimeIncludes = dependencyClosure(runtimePeers)
+// The app's own migrations and the script that applies them. Neither is
+// imported by any route, so the tracer never sees them, and without them the
+// container starts against a database that has the auth tables and nothing
+// else — `/` returns 200 and the first item page dies on `relation "items"
+// does not exist`. The same trap as the auth CLI, one track further along.
+const appMigrationIncludes = ["./drizzle/**/*", "./scripts/migrate.mjs"]
+
+const runtimeIncludes = [...dependencyClosure(runtimePeers), ...appMigrationIncludes]
 
 // The closure is the only thing keeping the database driver and the migrate
 // CLI in the image, and both fail long after the build looks green — the
@@ -105,6 +112,9 @@ for (const required of ["postgres", "@naeemba/next-starter", "drizzle-orm"]) {
 }
 
 const nextConfig: NextConfig = {
+  // `next dev` otherwise appends its own block to CLAUDE.md on every run, so
+  // the file this project holds itself to shows up modified in every diff.
+  agentRules: false,
   // Bundles the server and its traced node_modules into .next/standalone, so
   // the runtime image needs no npm install of its own.
   output: "standalone",
