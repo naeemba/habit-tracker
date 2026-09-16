@@ -56,7 +56,7 @@ missed days, multiple reward goals at once. Add when one is missed.
 
 ## Development
 
-Needs Node 20+ and Docker.
+Needs Node 20.12+ (for `--env-file-if-exists`) and Docker.
 
 ```bash
 cp .env.example .env          # then fill in BETTER_AUTH_SECRET
