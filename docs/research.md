@@ -110,8 +110,9 @@ Source: [Habit tracker schema notes](https://terminalskills.io/use-cases/build-h
 
 ## 7. Coolify deployment
 
-One Dockerfile, one container. SQLite file on a named volume mounted at
-`/app/data`. Run as a non-root user. Set the port and domain in Coolify.
+Original plan was one container with SQLite on a volume. Superseded by the
+stack decision (`docs/stack.md`): app container plus Coolify's Postgres
+service. Still one Dockerfile, non-root user, port and domain set in Coolify.
 
 Sources: [Coolify persistent storage](https://coolify.io/docs/knowledge-base/persistent-storage),
 [SQLite on Coolify](https://samperalabs.com/posts/how-to-manage-sqlite-databases-on-a-vps-with-coolify),

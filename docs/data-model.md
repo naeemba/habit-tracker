@@ -1,6 +1,6 @@
 # Data Model
 
-SQLite. One user, so no `user_id` anywhere. Dates are `YYYY-MM-DD` in the
+Postgres (see `docs/stack.md`). Types below are written loosely; use `uuid`, `date`, and `timestamptz` in the real schema. One user, so no `user_id` on domain tables; Better Auth owns its own user tables. Dates are `YYYY-MM-DD` in the
 user's timezone; instants are UTC ISO strings.
 
 ## items
@@ -76,7 +76,7 @@ Only one goal may have `redeemed_at = null`.
 
 ## settings
 
-Key/value: `timezone`, `daily_bonus` (default 5), `password_hash`.
+Key/value: `timezone`, `daily_bonus` (default 5). Auth is handled by Better Auth, no password stored here.
 
 ## Derived on read (never stored)
 

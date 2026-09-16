@@ -5,8 +5,8 @@
       "cards": [
         {
           "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
-          "title": "Choose stack and scaffold project",
-          "notes": "Decide server, database, and PWA setup. Produce a running Docker container with a hello page.",
+          "title": "Scaffold project on next-starter with Postgres",
+          "notes": "Decision made, see docs/stack.md. Install @naeemba/next-starter, run its init, point DATABASE_URL at a local Postgres, add Dockerfile with standalone output. Hello page runs in Docker.",
           "priority": "high"
         },
         {
@@ -53,8 +53,8 @@
         },
         {
           "id": "0a4a0fb1-f7c7-4cf3-b5a2-5a420dabcccd",
-          "title": "Single-user login",
-          "notes": "One password from environment. Session cookie.",
+          "title": "Sign-in via next-starter singleAdmin",
+          "notes": "createAuth({ singleAdmin: '<email>', passkey: { rpName: 'Habit Tracker' } }). Passkey primary, magic link backup. No custom password code.",
           "priority": "medium"
         },
         {
@@ -72,7 +72,7 @@
         {
           "id": "b83f7f75-15cb-4da9-8f81-345952be165f",
           "title": "Coolify deployment",
-          "notes": "Dockerfile, persistent volume for the database, environment documented in .env.example.\n\nSQLite on named volume at /app/data, non-root user. docs/research.md section 7.",
+          "notes": "Dockerfile with Next standalone output, non-root user. Coolify Postgres service, DATABASE_URL from Coolify. Environment documented in .env.example. docs/stack.md.",
           "priority": "medium"
         },
         {

@@ -45,7 +45,7 @@ costs only that day's bonus, never the points already earned.
 - PWA: home screen install, full screen, offline.
 - Push reminders at a set time per item.
 - Sync across devices through the server.
-- Single user, one password, no signups.
+- Single user, sign-in locked to one email (passkey, magic link, or Google).
 - Export everything to JSON.
 - Dark mode follows the system.
 
@@ -57,9 +57,10 @@ missed days, multiple reward goals at once. Add when one is missed.
 ## Documents
 
 - [Research notes](docs/research.md) — what other apps do and the decisions taken.
+- [Stack decision](docs/stack.md) — Next.js on next-starter, Postgres, what to add.
 - [Data model](docs/data-model.md) — tables, schedule shapes, derived values.
 - Work board: `.dashboard/board.json`.
 
 ## Deployment
 
-Docker container on Coolify. Details follow once the stack is chosen.
+App container plus Postgres service on Coolify. See [docs/stack.md](docs/stack.md).
