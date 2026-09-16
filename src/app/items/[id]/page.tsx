@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { requireSession } from "@/lib/auth-server"
 import { getItem } from "@/lib/item-queries"
 import { removeItem } from "../actions"
 import { ItemForm } from "../item-form"
@@ -10,6 +11,7 @@ export async function generateMetadata({ params }: PageProps<"/items/[id]">) {
 }
 
 export default async function EditItemPage({ params }: PageProps<"/items/[id]">) {
+  await requireSession()
   const { id } = await params
   const item = await getItem(id)
   if (!item) notFound()

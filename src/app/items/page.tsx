@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { requireSession } from "@/lib/auth-server"
 import { listItems } from "@/lib/item-queries"
 import { describeSchedule } from "@/lib/items"
 
@@ -10,6 +11,8 @@ export const metadata = { title: "Items" }
 export const dynamic = "force-dynamic"
 
 export default async function ItemsPage() {
+  // The proxy sees only that a cookie exists; this is the real gate.
+  await requireSession()
   const items = await listItems()
 
   return (

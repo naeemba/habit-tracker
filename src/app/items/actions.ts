@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { requireSession } from "@/lib/auth-server"
 import { createItem, deleteItem, updateItem } from "@/lib/item-queries"
 import { parseItemForm, readSubmittedFields, type SubmittedFields } from "@/lib/items"
 
-// ponytail: no session check here yet. Sign-in is its own card and the app is
-// not deployed; wire `/items` into proxy.ts's `protect` list when it lands.
+// The proxy only checks that a session cookie exists, and an action can be
+// posted without going through any page, so every one of these re-checks.
 
 /** What the form shows when a save is refused. `null` means nothing to say. */
 export type SaveResult = {
@@ -25,6 +26,8 @@ export async function saveItem(
   previous: SaveResult,
   form: FormData,
 ): Promise<SaveResult> {
+  await requireSession()
+
   let input
   try {
     input = parseItemForm(form)
@@ -43,6 +46,7 @@ export async function saveItem(
 }
 
 export async function removeItem(id: string): Promise<void> {
+  await requireSession()
   await deleteItem(id)
   revalidatePath("/items")
   redirect("/items")
