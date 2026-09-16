@@ -121,7 +121,7 @@ function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number 
  * the habit disappear from Today for good, with nothing thrown and nothing
  * logged — the same failure a bare `Array.isArray` was written to stop.
  */
-function weekdayList(schedule: Extract<Schedule, { type: "weekdays" }>): number[] {
+export function weekdayList(schedule: Extract<Schedule, { type: "weekdays" }>): number[] {
   const days = schedule.days
   if (!Array.isArray(days) || days.length === 0 || !days.every(isWeekday)) {
     throw new RangeError(`Weekdays must be a non-empty list of days 0-6: ${JSON.stringify(days)}`)

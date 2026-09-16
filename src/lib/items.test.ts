@@ -1,6 +1,6 @@
 import { deepStrictEqual, strictEqual, throws } from "node:assert/strict"
 import { test } from "node:test"
-import { describeSchedule, isItemId, parseItemForm } from "./items.ts"
+import { describeSchedule, isItemId, parseItemForm, readSubmittedFields } from "./items.ts"
 
 /** A form that would save, so each test can spoil exactly one field. */
 function validForm(overrides: Record<string, string | string[]> = {}): FormData {
@@ -77,6 +77,26 @@ test("points may be zero but not a fraction or a negative", () => {
   throws(() => parseItemForm(validForm({ points: "-1" })), /Points/)
 })
 
+test("a name or icon longer than its column is refused", () => {
+  throws(() => parseItemForm(validForm({ name: "a".repeat(81) })), /at most 80 characters/)
+  strictEqual(parseItemForm(validForm({ name: "a".repeat(80) })).name, "a".repeat(80))
+  throws(() => parseItemForm(validForm({ icon: "a".repeat(17) })), /at most 16 characters/)
+})
+
+test("a refused save hands back everything that was typed", () => {
+  const form = validForm({ name: "   ", scheduleType: "weekdays", weekdays: ["1", "5"] })
+  const typed = readSubmittedFields(form)
+  throws(() => parseItemForm(form), /name is required/)
+  // The form redraws itself from this object, so anything missing here is a
+  // field the user has to type again on a phone.
+  strictEqual(typed.name, "   ")
+  strictEqual(typed.icon, "🏋️")
+  strictEqual(typed.color, "#a1b2c3")
+  strictEqual(typed.points, "3")
+  strictEqual(typed.scheduleType, "weekdays")
+  deepStrictEqual(typed.weekdays, ["1", "5"])
+})
+
 test("only a uuid counts as an item id", () => {
   strictEqual(isItemId("0a4a0fb1-f7c7-4cf3-b5a2-5a420dabcccd"), true)
   strictEqual(isItemId("new"), false)
@@ -89,4 +109,19 @@ test("every schedule describes itself", () => {
   strictEqual(describeSchedule({ type: "per_week", count: 1 }), "Once a week")
   strictEqual(describeSchedule({ type: "per_week", count: 3 }), "3 times a week")
   strictEqual(describeSchedule({ type: "interval", days: 14 }), "Every 14 days since last done")
+})
+
+test("a schedule the database should never have holds says so instead of throwing", () => {
+  // jsonb has no CHECK constraint, so these can exist. Throwing would 500 the
+  // list page, and the list is the only way to reach the row and fix it.
+  const unreadable = [
+    { type: "weekdays" },
+    { type: "weekdays", days: "1,3" },
+    { type: "weekdays", days: [] },
+    { type: "weekdays", days: ["1", "5"] },
+    { type: "monthly" },
+  ]
+  for (const schedule of unreadable) {
+    strictEqual(describeSchedule(schedule as never), "Schedule needs fixing")
+  }
 })

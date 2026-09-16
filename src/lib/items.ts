@@ -4,7 +4,7 @@
  * Nothing here touches the database or React, so `items.test.ts` can run it
  * under `node --test`. The queries live in `item-queries.ts`.
  */
-import { isWeekday, type Schedule } from "./dates.ts"
+import { isWeekday, weekdayList, type Schedule } from "./dates.ts"
 
 /** A chore is "every N days since last done"; a habit has a fixed schedule. */
 export type ItemKind = "habit" | "chore"
@@ -146,18 +146,37 @@ export function readSubmittedFields(form: FormData): SubmittedFields {
   }
 }
 
-const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+/**
+ * 0 = Sunday, the order the `weekdays` schedule numbers its days. The form
+ * shows the same seven, shortened, so a week that starts on a different day
+ * cannot mean one thing in the list and another in the checkboxes.
+ */
+export const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
-/** One line for the list: what this item's schedule asks of you. */
+/**
+ * One line for the list: what this item's schedule asks of you.
+ *
+ * `schedule` is jsonb with no CHECK constraint, so a row typed into psql or
+ * restored from a backup can hold anything. Throwing here would 500 the list,
+ * and the list is the only way to reach the bad row and fix it — so a schedule
+ * that makes no sense says so and stays clickable.
+ */
 export function describeSchedule(schedule: Schedule): string {
-  switch (schedule.type) {
-    case "daily":
-      return "Every day"
-    case "weekdays":
-      return schedule.days.map(day => WEEKDAY_NAMES[day] ?? "?").join(", ")
-    case "per_week":
-      return schedule.count === 1 ? "Once a week" : `${schedule.count} times a week`
-    case "interval":
-      return schedule.days === 1 ? "Every day since last done" : `Every ${schedule.days} days since last done`
+  try {
+    switch (schedule.type) {
+      case "daily":
+        return "Every day"
+      case "weekdays":
+        return weekdayList(schedule).map(day => WEEKDAY_NAMES[day]).join(", ")
+      case "per_week":
+        return schedule.count === 1 ? "Once a week" : `${schedule.count} times a week`
+      case "interval":
+        return schedule.days === 1 ? "Every day since last done" : `Every ${schedule.days} days since last done`
+      default:
+        throw new RangeError(`Unknown schedule type: ${JSON.stringify(schedule)}`)
+    }
+  } catch (error) {
+    console.warn("Unreadable schedule", error)
+    return "Schedule needs fixing"
   }
 }
