@@ -7,116 +7,130 @@
           "id": "ebf37c7d-4353-4994-be49-82408befacab",
           "title": "Items: habits and chores CRUD",
           "notes": "Name, icon, color, points. Habit schedules: daily, weekdays, N per week. Chore schedule: every N days since last done.\n\nSchedule JSON shapes: docs/data-model.md.",
-          "priority": "high"
+          "priority": "high",
+          "parent": null
         },
         {
           "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
           "title": "Today view with one-tap check-off",
           "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
-          "priority": "high"
+          "priority": "high",
+          "parent": null
         },
         {
           "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
           "title": "Points ledger and daily bonus",
           "notes": "Each completion earns its points. +5 when everything due today is done. Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
-          "priority": "high"
+          "priority": "high",
+          "parent": null
         },
         {
           "id": "2934b855-641b-4553-9be1-9fddda8945d8",
           "title": "Reward goal with progress",
           "notes": "One active goal: name, target, picture. Progress bar, pace estimate, redeem with reset or carry over.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "41f48e93-176f-4684-b5e6-6398fa361334",
           "title": "Streaks, strength score, heatmap",
           "notes": "Current and best streak per habit. Loop-style strength score. Per-item calendar heatmap.\n\nScore formula: docs/research.md section 1 (Loop exponential smoothing). Chores get dueness instead of a score.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "fdd1c45f-ffc6-417c-8e52-fb26c3f58d15",
           "title": "PWA: install, offline, sync",
           "notes": "Manifest, service worker, offline check-offs queued in an IndexedDB outbox and replayed from the page on reconnect. docs/research.md section 5.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "d836e201-e6ae-4ede-803a-770c51298485",
           "title": "Push reminders",
           "notes": "Per-item reminder time. Standard Web Push with VAPID and a service worker push handler. Android Chrome only. docs/research.md section 4.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "0a4a0fb1-f7c7-4cf3-b5a2-5a420dabcccd",
           "title": "Sign-in via next-starter singleAdmin",
           "notes": "createAuth({ singleAdmin: '<email>', passkey: { rpName: 'Habit Tracker' } }). Passkey primary, magic link backup. No custom password code.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "51fbae48-c365-43f4-9d9e-3d7c2129c321",
           "title": "Export to JSON",
           "notes": "Dump all items, check-ins, ledger, goals.",
-          "priority": "low"
+          "priority": "low",
+          "parent": null
         },
         {
           "id": "db3d43af-14e8-40da-9fb7-5d8ab839d1d5",
           "title": "Dark mode",
           "notes": "Follow system preference.",
-          "priority": "low"
+          "priority": "low",
+          "parent": null
         },
         {
           "id": "b83f7f75-15cb-4da9-8f81-345952be165f",
           "title": "Coolify deployment",
           "notes": "Dockerfile with Next standalone output, non-root user. Coolify Postgres service, DATABASE_URL from Coolify. Environment documented in .env.example. docs/stack.md.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "c5d5c10b-e3af-49d4-b39f-fa0e587fc725",
           "title": "Chore dueness and Today sort order",
           "notes": "dueness = daysSinceLastDone / intervalDays. Overdue chores first, then due habits, then done items. Show a green-to-red hint per chore.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "54d5f525-3f60-44eb-b6bd-1aa54c2c4bfe",
           "title": "Home screen badge with count due",
           "notes": "Badging API on installed app: set badge to number of items still due today, clear at zero.",
-          "priority": "low"
+          "priority": "low",
+          "parent": null
         },
         {
           "id": "5ad6adb6-0670-4c67-920e-478ce3e84ab7",
           "title": "Reminder scheduler on the server",
           "notes": "Every minute, find items whose reminder_time matches now in the user's timezone and are still not done, send one push per item.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "0ac962d4-5fc9-4132-b657-e03f10e12cfb",
           "title": "Settings page",
           "notes": "Timezone, daily bonus value, password change, push subscribe button, export link.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         },
         {
           "id": "efd1ae35-f25f-4f73-a200-f55d9d7cc76b",
           "title": "Archive items instead of deleting",
           "notes": "archived_at keeps history and ledger intact. Archived items hidden from Today.",
-          "priority": "low"
+          "priority": "low",
+          "parent": null
         },
         {
           "id": "4ece4621-b1a8-4544-98c4-c657f38af915",
           "title": "Undo a check-off",
           "notes": "Tap again within the day removes the check-in and rewrites that day's ledger row.",
-          "priority": "medium"
+          "priority": "medium",
+          "parent": null
         }
       ]
     },
     {
+      "name": "Ship",
+      "cards": []
+    },
+    {
       "name": "Doing",
-      "cards": [
-        {
-          "id": "33a40ced-5e25-4f58-a812-9bfd76b02d58",
-          "title": "Dates module: one place for day boundaries",
-          "notes": "Single module that turns a UTC instant into local_date using the timezone setting, and lists which items are due on a date. Nothing else does date maths. docs/research.md section 6.",
-          "priority": "high"
-        }
-      ]
+      "cards": []
     },
     {
       "name": "Done",
@@ -125,7 +139,24 @@
           "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
           "title": "Scaffold project on next-starter with Postgres",
           "notes": "Shipped in PR #1 (scaffold-next-starter). Next 16 on @naeemba/next-starter, Postgres via docker-compose on port 5435, auth migrations through npm run db:migrate, Dockerfile with standalone output running non-root. Home page, sign-in and the auth API all verified in Docker from a clean build.\n\nTwo starter quirks worked around and recorded in docs/stack.md: build-time env validation, and optional peers the file tracer cannot see.\n\nReview fixes from PR #1 folded in.",
-          "priority": "high"
+          "priority": "high",
+          "parent": null
+        },
+        {
+          "id": "33a40ced-5e25-4f58-a812-9bfd76b02d58",
+          "title": "Dates module: one place for day boundaries",
+          "notes": "Single module that turns a UTC instant into local_date using the timezone setting, and lists which items are due on a date. Nothing else does date maths. docs/research.md section 6.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-16T10:50:55.871Z",
+          "branch": "dates-module",
+          "pullRequest": 2,
+          "comments": [
+            {
+              "at": "2026-09-16T10:50:55.871Z",
+              "body": "Shipped in PR #2 (dates-module). src/lib/dates.ts is the only place that does date maths: toLocalDate/today, addDays/daysBetween, dueness, isDue, dueItems, and the Schedule type. dueItems derives last-done and the week count from raw check-ins so nothing else picks its own week start. 7 tests on node --test, no framework; engines.node moved to >=22.18 for it.\n\nFollow-ups left for other cards: reminder scheduler should get its HH:MM formatter from here rather than rolling its own Intl; dueItems does not filter archived items; no Intl formatter cache yet."
+            }
+          ]
         }
       ]
     }
