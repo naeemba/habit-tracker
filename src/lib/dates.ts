@@ -63,6 +63,16 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((parse(to) - parse(from)) / MILLISECONDS_PER_DAY)
 }
 
+/**
+ * A day number as the `weekdays` schedule writes them: 0 = Sunday, 6 =
+ * Saturday. Exported because the form that writes a schedule has to refuse
+ * exactly what the guards here would later throw on; two copies of the range
+ * would drift and let the form save a day that then reads as corrupt.
+ */
+export function isWeekday(day: number): boolean {
+  return Number.isInteger(day) && day >= 0 && day <= 6
+}
+
 /** 0 = Sunday, matching the `weekdays` schedule shape. */
 function dayOfWeek(localDate: string): number {
   return new Date(parse(localDate)).getUTCDay()
@@ -113,7 +123,6 @@ function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number 
  */
 function weekdayList(schedule: Extract<Schedule, { type: "weekdays" }>): number[] {
   const days = schedule.days
-  const isWeekday = (day: number) => Number.isInteger(day) && day >= 0 && day <= 6
   if (!Array.isArray(days) || days.length === 0 || !days.every(isWeekday)) {
     throw new RangeError(`Weekdays must be a non-empty list of days 0-6: ${JSON.stringify(days)}`)
   }

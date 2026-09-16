@@ -28,5 +28,8 @@ an alternative.
 - No semicolons in TypeScript or config files. Nothing enforces it yet; add
   Prettier with `"semi": false` when the repo gets a CI job to hang it on.
 - `allowImportingTsExtensions` is on so `node --test` can resolve
-  `./dates.ts`. Write `.ts` import extensions in test files only; app code
-  under `src/app` still compiles with them, then breaks at `next build`.
+  `./dates.ts`. Modules under `src/lib` that a test imports need the `.ts`
+  extension on their own relative imports too — Node resolves the whole chain,
+  not just the entry. `next build` and the Docker build both handle that.
+  Nothing under `src/app` may use it: it compiles and then breaks at
+  `next build`.

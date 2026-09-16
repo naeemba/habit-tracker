@@ -32,6 +32,7 @@ export function ItemForm({ item }: { item?: Item }) {
   const schedule = item?.schedule
   // A refused save wins over the stored item: it is what the user last typed.
   const typed = result?.fields
+  const scheduleType = typed?.scheduleType ?? schedule?.type ?? "daily"
   const checkedWeekdays = typed
     ? typed.weekdays.map(Number)
     : schedule?.type === "weekdays" && Array.isArray(schedule.days)
@@ -74,12 +75,12 @@ export function ItemForm({ item }: { item?: Item }) {
         <legend className={label}>Schedule</legend>
 
         <label className="flex items-center gap-2 py-1">
-          <input type="radio" name="scheduleType" value="daily" defaultChecked={(typed?.scheduleType ?? schedule?.type ?? "daily") === "daily"} />
+          <input type="radio" name="scheduleType" value="daily" defaultChecked={scheduleType === "daily"} />
           <span>Every day</span>
         </label>
 
         <label className="flex items-center gap-2 py-1">
-          <input type="radio" name="scheduleType" value="weekdays" defaultChecked={(typed?.scheduleType ?? schedule?.type) === "weekdays"} />
+          <input type="radio" name="scheduleType" value="weekdays" defaultChecked={scheduleType === "weekdays"} />
           <span>Certain weekdays</span>
         </label>
         <div className="flex flex-wrap gap-2 pl-6">
@@ -92,7 +93,7 @@ export function ItemForm({ item }: { item?: Item }) {
         </div>
 
         <label className="flex items-center gap-2 py-1">
-          <input type="radio" name="scheduleType" value="per_week" defaultChecked={(typed?.scheduleType ?? schedule?.type) === "per_week"} />
+          <input type="radio" name="scheduleType" value="per_week" defaultChecked={scheduleType === "per_week"} />
           <span>Times a week</span>
         </label>
         <input
@@ -107,7 +108,7 @@ export function ItemForm({ item }: { item?: Item }) {
         />
 
         <label className="flex items-center gap-2 py-1">
-          <input type="radio" name="scheduleType" value="interval" defaultChecked={(typed?.scheduleType ?? schedule?.type) === "interval"} />
+          <input type="radio" name="scheduleType" value="interval" defaultChecked={scheduleType === "interval"} />
           <span>Every N days since last done (a chore)</span>
         </label>
         <input

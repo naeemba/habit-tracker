@@ -4,7 +4,7 @@
  * Nothing here touches the database or React, so `items.test.ts` can run it
  * under `node --test`. The queries live in `item-queries.ts`.
  */
-import type { Schedule } from "./dates"
+import { isWeekday, type Schedule } from "./dates.ts"
 
 /** A chore is "every N days since last done"; a habit has a fixed schedule. */
 export type ItemKind = "habit" | "chore"
@@ -42,6 +42,7 @@ export function isItemId(value: unknown): value is string {
  */
 export function parseItemForm(form: FormData): ItemInput {
   const schedule = parseSchedule(form)
+  const reminderTime = form.get("reminderTime")
   return {
     // Not asked for on the form. The four schedule types already split the two
     // kinds, so deriving it is what stops an item claiming to be a chore while
@@ -52,7 +53,7 @@ export function parseItemForm(form: FormData): ItemInput {
     color: match(form, "color", HEX_COLOR, "Colour must look like #a1b2c3."),
     points: wholeNumber(form, "points", "Points", 0, 999),
     schedule,
-    reminderTime: form.get("reminderTime") === "" || form.get("reminderTime") === null
+    reminderTime: reminderTime === "" || reminderTime === null
       ? null
       : match(form, "reminderTime", CLOCK_TIME, "Reminder time must look like 07:30."),
   }
@@ -67,7 +68,7 @@ function parseSchedule(form: FormData): Schedule {
       // 0 = Sunday, matching the `weekdays` shape in dates.ts. An empty list
       // would match no day and hide the habit from Today for good.
       const days = form.getAll("weekdays").map(Number)
-      if (days.length === 0 || !days.every(day => Number.isInteger(day) && day >= 0 && day <= 6)) {
+      if (days.length === 0 || !days.every(isWeekday)) {
         throw new RangeError("Pick at least one weekday.")
       }
       return { type: "weekdays", days: [...new Set(days)].sort((a, b) => a - b) }
