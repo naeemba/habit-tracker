@@ -22,16 +22,32 @@ const MILLISECONDS_PER_DAY = 86_400_000
  * `en-CA` formats as `YYYY-MM-DD`, which is exactly the local date shape.
  */
 export function toLocalDate(instant: Date, timezone: string): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(instant)
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(instant)
+  } catch {
+    throw new RangeError(`Unknown timezone in settings.timezone: ${timezone}`)
+  }
 }
 
 export function today(timezone: string): string {
   return toLocalDate(new Date(), timezone)
 }
 
-/** Local dates are plain calendar days, so parse them as UTC midnight. */
+/**
+ * Local dates are plain calendar days, so parse them as UTC midnight.
+ *
+ * `local_date` is a text column, so nothing upstream guarantees the shape.
+ * Throwing beats returning NaN: NaN reads as "not due" everywhere and the item
+ * just stops appearing, with nothing logged and nobody told. The round-trip
+ * check also rejects dates that exist as a string but not on a calendar, like
+ * `2026-02-31`, which `Date.parse` quietly rolls forward to March.
+ */
 function parse(localDate: string): number {
-  return Date.parse(`${localDate}T00:00:00Z`)
+  const time = Date.parse(`${localDate}T00:00:00Z`)
+  if (Number.isNaN(time) || new Date(time).toISOString().slice(0, 10) !== localDate) {
+    throw new RangeError(`Not a local date: ${localDate}`)
+  }
+  return time
 }
 
 export function addDays(localDate: string, days: number): string {
@@ -56,8 +72,12 @@ function weekStart(localDate: string): string {
 /**
  * How ripe a chore is: 0 just done, 1 due, above 1 overdue.
  * A chore never done is infinitely overdue, so it sorts to the top.
+ *
+ * An interval of 0 would divide to NaN, which reads as "never due" and hides
+ * the chore for good, so it throws instead.
  */
 export function dueness(lastDoneDate: string | null, localDate: string, intervalDays: number): number {
+  if (!(intervalDays > 0)) throw new RangeError(`Interval must be at least one day: ${intervalDays}`)
   if (lastDoneDate === null) return Infinity
   return daysBetween(lastDoneDate, localDate) / intervalDays
 }
@@ -97,6 +117,13 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
  * Callers pass raw check-ins and get a list back; deriving "last done" and
  * "done this week" happens here so the Today view, the daily bonus, the badge
  * count and the reminder scheduler cannot each invent their own week window.
+ *
+ * Doing an item today does not mean the same thing for both types. An
+ * `interval` chore drops out of the list the moment it is done, because its
+ * interval restarts. A `daily`, `weekdays` or `per_week` habit stays in the
+ * list after being done today, because its schedule does not move; the Today
+ * view needs it listed so the checkmark has a row to sit on. Callers that want
+ * "still outstanding" must subtract today's check-ins themselves.
  */
 export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
   items: ItemType[],

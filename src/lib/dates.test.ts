@@ -68,3 +68,26 @@ test("dueItems ignores check-ins after the date being asked about", () => {
 
   assert.deepEqual(dueItems(items, "2026-09-16", checkIns), items)
 })
+
+test("doing an item today drops the chore from the list but keeps the habit", () => {
+  // The Today view still needs the habit's row to put a checkmark on; the chore
+  // has restarted its interval and is not wanted again for two days.
+  const items = [
+    { id: "pushups", schedule: { type: "daily" } as const },
+    { id: "dishes", schedule: { type: "interval", days: 2 } as const },
+  ]
+  const checkIns = [
+    { itemId: "pushups", localDate: "2026-09-16" },
+    { itemId: "dishes", localDate: "2026-09-16" },
+  ]
+
+  const due = dueItems(items, "2026-09-16", checkIns).map(item => item.id)
+  assert.deepEqual(due, ["pushups"])
+})
+
+test("bad input throws instead of quietly hiding an item forever", () => {
+  assert.throws(() => addDays("2026-9-16", 1), /Not a local date/)
+  assert.throws(() => daysBetween("2026-02-31", "2026-03-01"), /Not a local date/)
+  assert.throws(() => dueness("2026-09-02", "2026-09-16", 0), /at least one day/)
+  assert.throws(() => toLocalDate(new Date(), ""), /Unknown timezone/)
+})
