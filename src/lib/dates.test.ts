@@ -1,6 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { addDays, daysBetween, dueItems, dueness, isDue, requiredItems, toLocalDate } from "./dates.ts"
+import type { Schedule } from "./dates.ts"
 
 const noHistory = { lastDoneDate: null, doneEarlierThisWeek: 0 }
 
@@ -110,6 +111,17 @@ test("bad input throws instead of quietly hiding an item forever", () => {
   assert.throws(() => dueness("2026-09-02", "2026-09-16", 0), /at least one day/)
   assert.throws(() => toLocalDate(new Date(), ""), /Unknown timezone/)
   assert.throws(() => toLocalDate(new Date("nonsense"), "Europe/Berlin"), /Not a valid instant/)
+  // The schedule column is JSON text too. A count of 0 used to read as "never
+  // due and never owed", so gym would drop off Today and never come back.
+  const badCount = { type: "per_week", count: 0 } as unknown as Schedule
+  assert.throws(() => isDue(badCount, "2026-09-16", noHistory), /Times per week must be at least one/)
+  // requiredToday returns early for per_week, so it needs its own guard, not isDue's.
+  assert.throws(
+    () => requiredItems([{ id: "gym", schedule: badCount }], "2026-09-16", []),
+    /Times per week must be at least one/,
+  )
+  const noDays = { type: "weekdays" } as unknown as Schedule
+  assert.throws(() => isDue(noDays, "2026-09-16", noHistory), /Weekdays must be a list of days/)
 })
 
 test("a malformed check-in date throws instead of reading as a future check-in", () => {

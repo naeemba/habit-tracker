@@ -87,6 +87,29 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
   return daysBetween(lastDoneDate, localDate) / intervalDays
 }
 
+/**
+ * Times per week, guarded. `schedule` is a text column holding JSON, so this
+ * number is as untrusted as a check-in date. A `0`, a missing field or a
+ * `"three"` makes `isDue` false and `requiredToday` false on every day of
+ * every week: the habit vanishes from Today and stops costing the bonus, with
+ * nothing thrown and nothing logged. Both readers go through here because
+ * `requiredToday` returns early for `per_week` and never reaches `isDue`.
+ */
+function weeklyCount(schedule: { count: number }): number {
+  if (!(schedule.count > 0)) throw new RangeError(`Times per week must be at least one: ${schedule.count}`)
+  return schedule.count
+}
+
+/**
+ * The weekday list, guarded. Without it a schedule missing `days` throws a
+ * TypeError from inside `includes` that names neither the item nor the field,
+ * and a `days` that is a string quietly matches nothing at all.
+ */
+function weekdayList(schedule: { days: number[] }): number[] {
+  if (!Array.isArray(schedule.days)) throw new RangeError(`Weekdays must be a list of days: ${schedule.days}`)
+  return schedule.days
+}
+
 /** One tap: the day an item was checked off, as stored. */
 export type CheckIn = { itemId: string; localDate: string }
 
@@ -117,9 +140,9 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
     case "daily":
       return true
     case "weekdays":
-      return schedule.days.includes(dayOfWeek(localDate))
+      return weekdayList(schedule).includes(dayOfWeek(localDate))
     case "per_week":
-      return context.doneEarlierThisWeek < schedule.count
+      return context.doneEarlierThisWeek < weeklyCount(schedule)
     case "interval":
       return dueness(context.lastDoneDate, localDate, schedule.days) >= 1
   }
@@ -142,7 +165,7 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
 export function requiredToday(schedule: Schedule, localDate: string, context: DueContext): boolean {
   if (schedule.type !== "per_week") return isDue(schedule, localDate, context)
   const daysLeftInWeek = 7 - dayOfWeek(localDate)
-  return schedule.count - context.doneEarlierThisWeek >= daysLeftInWeek
+  return weeklyCount(schedule) - context.doneEarlierThisWeek >= daysLeftInWeek
 }
 
 /**
