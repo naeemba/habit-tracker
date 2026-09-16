@@ -22,6 +22,10 @@ const MILLISECONDS_PER_DAY = 86_400_000
  * `en-CA` formats as `YYYY-MM-DD`, which is exactly the local date shape.
  */
 export function toLocalDate(instant: Date, timezone: string): string {
+  // Checked before the try so the catch below can only mean a bad timezone.
+  // `format` throws on an invalid Date too, and blaming a timezone that turns
+  // out to be perfectly correct sends you looking in the wrong place.
+  if (Number.isNaN(instant.getTime())) throw new RangeError(`Not a valid instant: ${instant}`)
   try {
     return new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(instant)
   } catch {
@@ -73,8 +77,9 @@ function weekStart(localDate: string): string {
  * How ripe a chore is: 0 just done, 1 due, above 1 overdue.
  * A chore never done is infinitely overdue, so it sorts to the top.
  *
- * An interval of 0 would divide to NaN, which reads as "never due" and hides
- * the chore for good, so it throws instead.
+ * An interval of 0 divides to Infinity on every day but the one it was done,
+ * so the chore would be due forever and never leave the list. It throws
+ * instead.
  */
 export function dueness(lastDoneDate: string | null, localDate: string, intervalDays: number): number {
   if (!(intervalDays > 0)) throw new RangeError(`Interval must be at least one day: ${intervalDays}`)
@@ -135,6 +140,10 @@ export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
   const weeklyCounts = new Map<string, number>()
 
   for (const checkIn of checkIns) {
+    // These are compared as strings, and a malformed one compares wrong rather
+    // than failing: "2026-9-16" sorts after "2026-09-16", so a bad row reads as
+    // a future check-in and is dropped. Parse it first so the guard sees it.
+    parse(checkIn.localDate)
     if (checkIn.localDate > localDate) continue
     const lastDoneDate = lastDoneDates.get(checkIn.itemId)
     if (lastDoneDate === undefined || checkIn.localDate > lastDoneDate) {

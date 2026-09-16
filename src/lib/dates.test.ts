@@ -90,4 +90,15 @@ test("bad input throws instead of quietly hiding an item forever", () => {
   assert.throws(() => daysBetween("2026-02-31", "2026-03-01"), /Not a local date/)
   assert.throws(() => dueness("2026-09-02", "2026-09-16", 0), /at least one day/)
   assert.throws(() => toLocalDate(new Date(), ""), /Unknown timezone/)
+  assert.throws(() => toLocalDate(new Date("nonsense"), "Europe/Berlin"), /Not a valid instant/)
+})
+
+test("a malformed check-in date throws instead of reading as a future check-in", () => {
+  // "2026-9-01" sorts after "2026-09-16" as a string, so without the guard this
+  // row would be skipped and the chore would look never-done and always overdue.
+  const items = [{ id: "filter", schedule: { type: "interval", days: 14 } as const }]
+  assert.throws(
+    () => dueItems(items, "2026-09-16", [{ itemId: "filter", localDate: "2026-9-01" }]),
+    /Not a local date: 2026-9-01/,
+  )
 })
