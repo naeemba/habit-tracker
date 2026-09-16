@@ -48,7 +48,7 @@ are a fact, not a recomputation.
 |---|---|---|
 | local_date | text | primary key |
 | item_points | integer | sum of points for check-ins that day |
-| bonus | integer | 5 when all due items done, else 0 |
+| bonus | integer | 5 when everything owed that day is done, else 0 |
 
 Total points = sum over ledger minus redeemed goals.
 

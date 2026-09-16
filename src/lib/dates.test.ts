@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { addDays, daysBetween, dueItems, dueness, isDue, toLocalDate } from "./dates.ts"
+import { addDays, daysBetween, dueItems, dueness, isDue, requiredItems, toLocalDate } from "./dates.ts"
 
 const noHistory = { lastDoneDate: null, doneEarlierThisWeek: 0 }
 
@@ -120,4 +120,29 @@ test("a malformed check-in date throws instead of reading as a future check-in",
     () => dueItems(items, "2026-09-16", [{ itemId: "filter", localDate: "2026-9-01" }]),
     /Not a local date: 2026-9-01/,
   )
+})
+
+test("a per_week habit is only owed once the count left fills the days left", () => {
+  // 3 per week, nothing done. 2026-09-14 is a Monday, 2026-09-18 a Friday.
+  const items = [
+    { id: "pushups", schedule: { type: "daily" } as const },
+    { id: "gym", schedule: { type: "per_week", count: 3 } as const },
+  ]
+
+  // Monday: gym is listed, but Tuesday to Saturday still fit three sessions, so
+  // doing only pushups must not cost the daily bonus.
+  assert.deepEqual(dueItems(items, "2026-09-14", []).map(item => item.id), ["pushups", "gym"])
+  assert.deepEqual(requiredItems(items, "2026-09-14", []).map(item => item.id), ["pushups"])
+
+  // Friday with one done: two left, two days left, so today is one of them.
+  const oneDone = [{ itemId: "gym", localDate: "2026-09-14" }]
+  assert.deepEqual(requiredItems(items, "2026-09-18", oneDone).map(item => item.id), ["pushups", "gym"])
+
+  // Friday with two done: Saturday alone covers the third.
+  const twoDone = [...oneDone, { itemId: "gym", localDate: "2026-09-15" }]
+  assert.deepEqual(requiredItems(items, "2026-09-18", twoDone).map(item => item.id), ["pushups"])
+
+  // Count met by earlier days: not listed, so not owed either.
+  const threeDone = [...twoDone, { itemId: "gym", localDate: "2026-09-16" }]
+  assert.deepEqual(requiredItems(items, "2026-09-18", threeDone).map(item => item.id), ["pushups"])
 })

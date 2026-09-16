@@ -87,6 +87,9 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
   return daysBetween(lastDoneDate, localDate) / intervalDays
 }
 
+/** One tap: the day an item was checked off, as stored. */
+export type CheckIn = { itemId: string; localDate: string }
+
 /**
  * What an item's own history says about the date being asked about.
  * Both fields are required: a forgotten one would silently read as "never
@@ -104,9 +107,10 @@ export type DueContext = {
 }
 
 /**
- * Whether an item wants doing on a given local date.
- * A `per_week` habit stays due every day until the week's count is met by
- * earlier days, so the last tap of the week does not remove the row under it.
+ * Whether an item wants doing on a given local date — what the Today view
+ * lists. A `per_week` habit stays due every day until the week's count is met
+ * by earlier days, so the last tap of the week does not remove the row under
+ * it. "Listed today" is not "must be done today": see `requiredToday`.
  */
 export function isDue(schedule: Schedule, localDate: string, context: DueContext): boolean {
   switch (schedule.type) {
@@ -119,6 +123,26 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
     case "interval":
       return dueness(context.lastDoneDate, localDate, schedule.days) >= 1
   }
+}
+
+/**
+ * Whether missing an item today costs the daily bonus.
+ *
+ * For everything with a fixed day this is the same question as `isDue`. A
+ * `per_week` habit is different: it is listed every day of its week, but the
+ * user only owes it today once the count still left no longer fits in the days
+ * still left. Gym 3 per week, nothing done: not required on Monday with six
+ * days to go, required on Friday because Friday and Saturday are two days and
+ * three are owed.
+ *
+ * Without this the bonus would read "listed" as "owed" and charge the user for
+ * a Monday they got right. The week window stays here so the bonus does not
+ * have to rebuild it; see `dueItems`.
+ */
+export function requiredToday(schedule: Schedule, localDate: string, context: DueContext): boolean {
+  if (schedule.type !== "per_week") return isDue(schedule, localDate, context)
+  const daysLeftInWeek = 7 - dayOfWeek(localDate)
+  return schedule.count - context.doneEarlierThisWeek >= daysLeftInWeek
 }
 
 /**
@@ -144,7 +168,31 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
 export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
   items: ItemType[],
   localDate: string,
-  checkIns: { itemId: string; localDate: string }[],
+  checkIns: CheckIn[],
+): ItemType[] {
+  return selectItems(items, localDate, checkIns, isDue)
+}
+
+/**
+ * The items the daily bonus requires on a local date, given every check-in.
+ *
+ * `dueItems` minus the `per_week` habits that still have room left in the week
+ * — the rows a user can leave untapped today without losing the bonus. Callers
+ * still subtract today's own check-ins to get what is outstanding.
+ */
+export function requiredItems<ItemType extends { id: string; schedule: Schedule }>(
+  items: ItemType[],
+  localDate: string,
+  checkIns: CheckIn[],
+): ItemType[] {
+  return selectItems(items, localDate, checkIns, requiredToday)
+}
+
+function selectItems<ItemType extends { id: string; schedule: Schedule }>(
+  items: ItemType[],
+  localDate: string,
+  checkIns: CheckIn[],
+  wanted: (schedule: Schedule, localDate: string, context: DueContext) => boolean,
 ): ItemType[] {
   const firstDayOfWeek = weekStart(localDate)
   const lastDoneDates = new Map<string, string>()
@@ -166,7 +214,7 @@ export function dueItems<ItemType extends { id: string; schedule: Schedule }>(
   }
 
   return items.filter(item =>
-    isDue(item.schedule, localDate, {
+    wanted(item.schedule, localDate, {
       lastDoneDate: lastDoneDates.get(item.id) ?? null,
       doneEarlierThisWeek: earlierWeeklyCounts.get(item.id) ?? 0,
     }),
