@@ -95,7 +95,7 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
  * nothing thrown and nothing logged. Both readers go through here because
  * `requiredToday` returns early for `per_week` and never reaches `isDue`.
  */
-function weeklyCount(schedule: { count: number }): number {
+function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number {
   if (!(schedule.count > 0)) throw new RangeError(`Times per week must be at least one: ${schedule.count}`)
   return schedule.count
 }
@@ -104,10 +104,20 @@ function weeklyCount(schedule: { count: number }): number {
  * The weekday list, guarded. Without it a schedule missing `days` throws a
  * TypeError from inside `includes` that names neither the item nor the field,
  * and a `days` that is a string quietly matches nothing at all.
+ *
+ * Being an array is not enough. `dayOfWeek` returns a number, so the `["1",
+ * "3", "5"]` an HTML form posts matches nothing on any day, and so does `[7]`
+ * or an empty list from a form with no boxes checked. Every one of those makes
+ * the habit disappear from Today for good, with nothing thrown and nothing
+ * logged — the same failure a bare `Array.isArray` was written to stop.
  */
-function weekdayList(schedule: { days: number[] }): number[] {
-  if (!Array.isArray(schedule.days)) throw new RangeError(`Weekdays must be a list of days: ${schedule.days}`)
-  return schedule.days
+function weekdayList(schedule: Extract<Schedule, { type: "weekdays" }>): number[] {
+  const days = schedule.days
+  const isWeekday = (day: number) => Number.isInteger(day) && day >= 0 && day <= 6
+  if (!Array.isArray(days) || days.length === 0 || !days.every(isWeekday)) {
+    throw new RangeError(`Weekdays must be a non-empty list of days 0-6: ${JSON.stringify(days)}`)
+  }
+  return days
 }
 
 /** One tap: the day an item was checked off, as stored. */
@@ -154,9 +164,9 @@ export function isDue(schedule: Schedule, localDate: string, context: DueContext
  * For everything with a fixed day this is the same question as `isDue`. A
  * `per_week` habit is different: it is listed every day of its week, but the
  * user only owes it today once the count still left no longer fits in the days
- * still left. Gym 3 per week, nothing done: not required on Monday with six
- * days to go, required on Friday because Friday and Saturday are two days and
- * three are owed.
+ * left after today. Gym 3 per week, nothing done: not required on Monday with
+ * six days to go, required on Friday because Friday and Saturday are two days
+ * and three are owed.
  *
  * Without this the bonus would read "listed" as "owed" and charge the user for
  * a Monday they got right. The week window stays here so the bonus does not

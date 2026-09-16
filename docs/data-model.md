@@ -84,7 +84,7 @@ Key/value: `timezone`, `daily_bonus` (default 5). Auth is handled by Better Auth
   `daysSinceLastDone >= intervalDays` (dueness >= 1). A `per_week` habit is due
   every day of its week until earlier days meet the count.
 - Owed today (what the bonus checks): due today, minus a `per_week` habit whose
-  remaining count still fits in the days left in the week. Gym 3 per week with
+  remaining count still fits in the days left in the week after today. Gym 3 per week with
   none done is due on Monday but not owed; on Friday two are left and two days
   are left, so it is owed.
 - Streak: walk back from today over due days.

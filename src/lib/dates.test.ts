@@ -119,8 +119,14 @@ test("bad input throws instead of quietly hiding an item forever", () => {
     () => requiredItems([{ id: "gym", schedule: badCount }], "2026-09-16", []),
     /Times per week must be at least one/,
   )
-  const noDays = { type: "weekdays" } as unknown as Schedule
-  assert.throws(() => isDue(noDays, "2026-09-16", noHistory), /Weekdays must be a list of days/)
+  // Weekdays come off a checkbox form, and HTML form values are strings. A
+  // ["1","3","5"] is an array of the right length that matches no day at all,
+  // so reading would never appear on Today again. An empty list and a [7] are
+  // the same silent nothing from the other directions.
+  const weekdays = (days: unknown) => ({ type: "weekdays", days }) as unknown as Schedule
+  for (const days of [undefined, "1,3,5", ["1", "3", "5"], [], [7], [-1], [1.5]]) {
+    assert.throws(() => isDue(weekdays(days), "2026-09-16", noHistory), /Weekdays must be a non-empty list of days 0-6/)
+  }
 })
 
 test("a malformed check-in date throws instead of reading as a future check-in", () => {
