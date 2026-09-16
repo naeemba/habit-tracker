@@ -1,0 +1,89 @@
+{
+  "columns": [
+    {
+      "name": "Todo",
+      "cards": [
+        {
+          "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
+          "title": "Choose stack and scaffold project",
+          "notes": "Decide server, database, and PWA setup. Produce a running Docker container with a hello page.",
+          "priority": "high"
+        },
+        {
+          "id": "ebf37c7d-4353-4994-be49-82408befacab",
+          "title": "Items: habits and chores CRUD",
+          "notes": "Name, icon, color, points. Habit schedules: daily, weekdays, N per week. Chore schedule: every N days since last done.",
+          "priority": "high"
+        },
+        {
+          "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
+          "title": "Today view with one-tap check-off",
+          "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
+          "priority": "high"
+        },
+        {
+          "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
+          "title": "Points ledger and daily bonus",
+          "notes": "Each completion earns its points. +5 when everything due today is done. Ledger per day.",
+          "priority": "high"
+        },
+        {
+          "id": "2934b855-641b-4553-9be1-9fddda8945d8",
+          "title": "Reward goal with progress",
+          "notes": "One active goal: name, target, picture. Progress bar, pace estimate, redeem with reset or carry over.",
+          "priority": "medium"
+        },
+        {
+          "id": "41f48e93-176f-4684-b5e6-6398fa361334",
+          "title": "Streaks, strength score, heatmap",
+          "notes": "Current and best streak per habit. Loop-style strength score. Per-item calendar heatmap.",
+          "priority": "medium"
+        },
+        {
+          "id": "fdd1c45f-ffc6-417c-8e52-fb26c3f58d15",
+          "title": "PWA: install, offline, sync",
+          "notes": "Manifest, service worker, offline check-offs queued and synced.",
+          "priority": "medium"
+        },
+        {
+          "id": "d836e201-e6ae-4ede-803a-770c51298485",
+          "title": "Push reminders",
+          "notes": "Per-item reminder time. Web Push, works when installed from Safari on iOS.",
+          "priority": "medium"
+        },
+        {
+          "id": "0a4a0fb1-f7c7-4cf3-b5a2-5a420dabcccd",
+          "title": "Single-user login",
+          "notes": "One password from environment. Session cookie.",
+          "priority": "medium"
+        },
+        {
+          "id": "51fbae48-c365-43f4-9d9e-3d7c2129c321",
+          "title": "Export to JSON",
+          "notes": "Dump all items, check-ins, ledger, goals.",
+          "priority": "low"
+        },
+        {
+          "id": "db3d43af-14e8-40da-9fb7-5d8ab839d1d5",
+          "title": "Dark mode",
+          "notes": "Follow system preference.",
+          "priority": "low"
+        },
+        {
+          "id": "b83f7f75-15cb-4da9-8f81-345952be165f",
+          "title": "Coolify deployment",
+          "notes": "Dockerfile, persistent volume for the database, environment documented in .env.example.",
+          "priority": "medium"
+        }
+      ]
+    },
+    {
+      "name": "Doing",
+      "cards": []
+    },
+    {
+      "name": "Done",
+      "cards": []
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+# Habit Tracker
+
+A personal habit and chore tracker with a points-based reward system.
+Web app built for the phone (installable PWA), backed by a small server,
+deployed on Coolify.
+
+## Why
+
+Mostly chores, some habits. Every completed item earns points. Points add
+up toward a real reward (first goal: a Thunderbolt 5 dock). Missing a day
+costs only that day's bonus, never the points already earned.
+
+## Features
+
+### Items
+
+- **Habits** — fixed schedule: daily, specific weekdays, N times per week.
+- **Chores** — interval from last completion: "every 14 days", resets when done.
+- Name, icon, color, points value (default 1).
+- Optional short note on each check-in.
+
+### Today
+
+- One list of everything due today, one tap to check off.
+- Overdue chores show at the top.
+- Works offline; syncs when back online.
+
+### Progress
+
+- Streaks (current and best) for habits.
+- Habit strength score: one miss dents it, does not zero it.
+- Per-item heatmap calendar.
+
+### Points and rewards
+
+- Each completed item earns its points.
+- Daily bonus: +5 when everything due today is done.
+- One active reward goal: name, target points, optional picture.
+- Progress bar and "at your current pace: ~N days left".
+- Ledger of points earned per day.
+- Redeem when the goal is reached; points reset or carry over.
+
+### Platform
+
+- PWA: home screen install, full screen, offline.
+- Push reminders at a set time per item.
+- Sync across devices through the server.
+- Single user, one password, no signups.
+- Export everything to JSON.
+- Dark mode follows the system.
+
+## Not in scope
+
+Social features, gamification beyond points, categories, penalties for
+missed days, multiple reward goals at once. Add when one is missed.
+
+## Deployment
+
+Docker container on Coolify. Details follow once the stack is chosen.
