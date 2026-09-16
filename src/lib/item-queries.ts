@@ -31,16 +31,23 @@ export async function createItem(input: ItemInput): Promise<void> {
   await db.insert(items).values(input)
 }
 
-/** Both writers take their id from a URL, so both check it the same way. */
-function existing(id: string) {
-  if (!isItemId(id)) throw new RangeError("That item no longer exists.")
+/**
+ * Both writers take their id from a URL, so both check it the same way.
+ *
+ * Nothing shows this message. A non-uuid never reaches here through the app —
+ * the edit page 404s on one — so getting here means a replayed request, and a
+ * server error is the right answer to that. The pages are where a missing item
+ * is turned into something a user reads.
+ */
+function whereItemId(id: string) {
+  if (!isItemId(id)) throw new RangeError(`Not an item id: ${id}`)
   return eq(items.id, id)
 }
 
 export async function updateItem(id: string, input: ItemInput): Promise<void> {
-  await db.update(items).set(input).where(existing(id))
+  await db.update(items).set(input).where(whereItemId(id))
 }
 
 export async function deleteItem(id: string): Promise<void> {
-  await db.delete(items).where(existing(id))
+  await db.delete(items).where(whereItemId(id))
 }
