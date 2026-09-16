@@ -4,12 +4,6 @@
       "name": "Todo",
       "cards": [
         {
-          "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
-          "title": "Scaffold project on next-starter with Postgres",
-          "notes": "Decision made, see docs/stack.md. Install @naeemba/next-starter, run its init, point DATABASE_URL at a local Postgres, add Dockerfile with standalone output. Hello page runs in Docker.",
-          "priority": "high"
-        },
-        {
           "id": "ebf37c7d-4353-4994-be49-82408befacab",
           "title": "Items: habits and chores CRUD",
           "notes": "Name, icon, color, points. Habit schedules: daily, weekdays, N per week. Chore schedule: every N days since last done.\n\nSchedule JSON shapes: docs/data-model.md.",
@@ -121,7 +115,14 @@
     },
     {
       "name": "Doing",
-      "cards": []
+      "cards": [
+        {
+          "id": "dd6c04a0-3233-4e77-8eb3-d5971067479d",
+          "title": "Scaffold project on next-starter with Postgres",
+          "notes": "Decision made, see docs/stack.md. Install @naeemba/next-starter, run its init, point DATABASE_URL at a local Postgres, add Dockerfile with standalone output. Hello page runs in Docker.",
+          "priority": "high"
+        }
+      ]
     },
     {
       "name": "Done",
