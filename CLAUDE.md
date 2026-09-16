@@ -2,6 +2,10 @@
 
 Personal habit and chore tracker with points toward a reward. Read
 `README.md` for the full feature list; it is the source of truth for scope.
+`docs/data-model.md` is the source of truth for tables and schedule
+shapes. `docs/research.md` holds the formulas (strength score, dueness)
+and the platform limits (iOS push, offline). Check it before inventing
+an alternative.
 
 ## Product rules
 

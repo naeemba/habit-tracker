@@ -54,6 +54,12 @@ costs only that day's bonus, never the points already earned.
 Social features, gamification beyond points, categories, penalties for
 missed days, multiple reward goals at once. Add when one is missed.
 
+## Documents
+
+- [Research notes](docs/research.md) — what other apps do and the decisions taken.
+- [Data model](docs/data-model.md) — tables, schedule shapes, derived values.
+- Work board: `.dashboard/board.json`.
+
 ## Deployment
 
 Docker container on Coolify. Details follow once the stack is chosen.

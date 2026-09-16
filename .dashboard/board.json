@@ -12,7 +12,7 @@
         {
           "id": "ebf37c7d-4353-4994-be49-82408befacab",
           "title": "Items: habits and chores CRUD",
-          "notes": "Name, icon, color, points. Habit schedules: daily, weekdays, N per week. Chore schedule: every N days since last done.",
+          "notes": "Name, icon, color, points. Habit schedules: daily, weekdays, N per week. Chore schedule: every N days since last done.\n\nSchedule JSON shapes: docs/data-model.md.",
           "priority": "high"
         },
         {
@@ -24,7 +24,7 @@
         {
           "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
           "title": "Points ledger and daily bonus",
-          "notes": "Each completion earns its points. +5 when everything due today is done. Ledger per day.",
+          "notes": "Each completion earns its points. +5 when everything due today is done. Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
           "priority": "high"
         },
         {
@@ -36,19 +36,19 @@
         {
           "id": "41f48e93-176f-4684-b5e6-6398fa361334",
           "title": "Streaks, strength score, heatmap",
-          "notes": "Current and best streak per habit. Loop-style strength score. Per-item calendar heatmap.",
+          "notes": "Current and best streak per habit. Loop-style strength score. Per-item calendar heatmap.\n\nScore formula: docs/research.md section 1 (Loop exponential smoothing). Chores get dueness instead of a score.",
           "priority": "medium"
         },
         {
           "id": "fdd1c45f-ffc6-417c-8e52-fb26c3f58d15",
           "title": "PWA: install, offline, sync",
-          "notes": "Manifest, service worker, offline check-offs queued and synced.",
+          "notes": "Manifest, service worker, offline check-offs queued and synced.\n\nOutbox in IndexedDB, page-side replay, client uuid on every check-in. Background Sync is not on iOS. docs/research.md section 5.",
           "priority": "medium"
         },
         {
           "id": "d836e201-e6ae-4ede-803a-770c51298485",
           "title": "Push reminders",
-          "notes": "Per-item reminder time. Web Push, works when installed from Safari on iOS.",
+          "notes": "Per-item reminder time. Web Push, works when installed from Safari on iOS.\n\nDeclarative Web Push JSON plus service worker push handler. Subscribe button must be a tap. Never send a silent push. docs/research.md section 4.",
           "priority": "medium"
         },
         {
@@ -72,7 +72,49 @@
         {
           "id": "b83f7f75-15cb-4da9-8f81-345952be165f",
           "title": "Coolify deployment",
-          "notes": "Dockerfile, persistent volume for the database, environment documented in .env.example.",
+          "notes": "Dockerfile, persistent volume for the database, environment documented in .env.example.\n\nSQLite on named volume at /app/data, non-root user. docs/research.md section 7.",
+          "priority": "medium"
+        },
+        {
+          "id": "33a40ced-5e25-4f58-a812-9bfd76b02d58",
+          "title": "Dates module: one place for day boundaries",
+          "notes": "Single module that turns a UTC instant into local_date using the timezone setting, and lists which items are due on a date. Nothing else does date maths. docs/research.md section 6.",
+          "priority": "high"
+        },
+        {
+          "id": "c5d5c10b-e3af-49d4-b39f-fa0e587fc725",
+          "title": "Chore dueness and Today sort order",
+          "notes": "dueness = daysSinceLastDone / intervalDays. Overdue chores first, then due habits, then done items. Show a green-to-red hint per chore.",
+          "priority": "medium"
+        },
+        {
+          "id": "54d5f525-3f60-44eb-b6bd-1aa54c2c4bfe",
+          "title": "Home screen badge with count due",
+          "notes": "Badging API on installed app: set badge to number of items still due today, clear at zero.",
+          "priority": "low"
+        },
+        {
+          "id": "5ad6adb6-0670-4c67-920e-478ce3e84ab7",
+          "title": "Reminder scheduler on the server",
+          "notes": "Every minute, find items whose reminder_time matches now in the user's timezone and are still not done, send one push per item.",
+          "priority": "medium"
+        },
+        {
+          "id": "0ac962d4-5fc9-4132-b657-e03f10e12cfb",
+          "title": "Settings page",
+          "notes": "Timezone, daily bonus value, password change, push subscribe button, export link.",
+          "priority": "medium"
+        },
+        {
+          "id": "efd1ae35-f25f-4f73-a200-f55d9d7cc76b",
+          "title": "Archive items instead of deleting",
+          "notes": "archived_at keeps history and ledger intact. Archived items hidden from Today.",
+          "priority": "low"
+        },
+        {
+          "id": "4ece4621-b1a8-4544-98c4-c657f38af915",
+          "title": "Undo a check-off",
+          "notes": "Tap again within the day removes the check-in and rewrites that day's ledger row.",
           "priority": "medium"
         }
       ]
