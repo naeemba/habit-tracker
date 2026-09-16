@@ -20,7 +20,7 @@
         {
           "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
           "title": "Points ledger and daily bonus",
-          "notes": "Each completion earns its points. +5 when everything due today is done. Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
+          "notes": "Each completion earns its points. +5 when everything owed that day is done \u2014 requiredItems() from src/lib/dates.ts, not dueItems(). A per_week habit is listed every day of its week but only owed once the count left no longer fits in the days left. Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
           "priority": "high",
           "parent": null
         },
@@ -154,7 +154,7 @@
           "comments": [
             {
               "at": "2026-09-16T10:50:55.871Z",
-              "body": "Shipped in PR #2 (dates-module). src/lib/dates.ts is the only place that does date maths: toLocalDate/today, addDays/daysBetween, dueness, isDue, dueItems, and the Schedule type. dueItems derives last-done and the week count from raw check-ins so nothing else picks its own week start. 7 tests on node --test, no framework; engines.node moved to >=22.18 for it.\n\nFollow-ups left for other cards: reminder scheduler should get its HH:MM formatter from here rather than rolling its own Intl; dueItems does not filter archived items; no Intl formatter cache yet."
+              "body": "Shipped in PR #2 (dates-module). src/lib/dates.ts is the only place that does date maths: toLocalDate/today, addDays/daysBetween, dueness, isDue/dueItems, requiredToday/requiredItems, and the Schedule type. dueItems derives last-done and the week count from raw check-ins so nothing else picks its own week start. 7 tests on node --test, no framework; engines.node moved to >=22.18 for it.\n\nFollow-ups left for other cards: reminder scheduler should get its HH:MM formatter from here rather than rolling its own Intl; dueItems does not filter archived items; no Intl formatter cache yet."
             }
           ]
         }
