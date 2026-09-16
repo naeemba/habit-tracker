@@ -72,9 +72,9 @@ Sources: [Tody vs Sweepy](https://plastnofy.com/articles/tody-vs-sweepy),
                     "navigate": "https://app.example/today" } }
 ```
 
-Decision: send Declarative Web Push JSON, and also handle the `push` event in
-the service worker so Chrome and older Safari still show it. Subscribe button
-lives on the settings page, triggered by a tap.
+Decision: target is Android Chrome only. Standard Web Push with a service
+worker `push` handler and VAPID keys. Skip Declarative Web Push. The iOS
+notes above stay for reference in case that changes.
 
 Sources: [MagicBell iOS limitations](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide),
 [instantpwa](https://instantpwa.com/answers/can-pwa-send-push-notifications-ios),
@@ -83,12 +83,14 @@ Sources: [MagicBell iOS limitations](https://www.magicbell.com/blog/pwa-ios-limi
 
 ## 5. Offline writes
 
-Background Sync API is not on iOS. Use an outbox: queued writes in IndexedDB,
-replayed in order from the page when `online` fires or the app opens. Each
-write carries a client UUID; the server ignores a duplicate.
+Use an outbox: queued writes in IndexedDB, replayed in order when `online`
+fires or the app opens. Each write carries a client UUID; the server ignores
+a duplicate. Android Chrome supports the Background Sync API, so the service
+worker can also trigger the replay, but a page-side replay is enough and
+avoids two replayers racing.
 
-Decision: outbox in IndexedDB, page-side replay only, idempotent server
-endpoints keyed on the client id.
+Decision: outbox in IndexedDB, page-side replay, idempotent server endpoints
+keyed on the client id. Background Sync only if page replay proves flaky.
 
 Sources: [Outbox pattern](https://amux.io/guides/pwa-offline-sync-outbox-pattern/),
 [Offline-first patterns](https://rohitraj.tech/notes/pwa-offline-sync).

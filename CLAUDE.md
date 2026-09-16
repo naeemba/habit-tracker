@@ -9,6 +9,7 @@ an alternative.
 
 ## Product rules
 
+- Target device is Android Chrome. Do not spend effort on iOS Safari quirks.
 - Single user. No signups, no roles, no multi-tenancy.
 - Chores use "every N days since last done". Habits use a fixed schedule.
   Do not merge the two into one schedule type.

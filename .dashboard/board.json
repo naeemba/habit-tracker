@@ -42,13 +42,13 @@
         {
           "id": "fdd1c45f-ffc6-417c-8e52-fb26c3f58d15",
           "title": "PWA: install, offline, sync",
-          "notes": "Manifest, service worker, offline check-offs queued and synced.\n\nOutbox in IndexedDB, page-side replay, client uuid on every check-in. Background Sync is not on iOS. docs/research.md section 5.",
+          "notes": "Manifest, service worker, offline check-offs queued in an IndexedDB outbox and replayed from the page on reconnect. docs/research.md section 5.",
           "priority": "medium"
         },
         {
           "id": "d836e201-e6ae-4ede-803a-770c51298485",
           "title": "Push reminders",
-          "notes": "Per-item reminder time. Web Push, works when installed from Safari on iOS.\n\nDeclarative Web Push JSON plus service worker push handler. Subscribe button must be a tap. Never send a silent push. docs/research.md section 4.",
+          "notes": "Per-item reminder time. Standard Web Push with VAPID and a service worker push handler. Android Chrome only. docs/research.md section 4.",
           "priority": "medium"
         },
         {
