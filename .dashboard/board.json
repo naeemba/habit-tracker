@@ -154,7 +154,7 @@
           "comments": [
             {
               "at": "2026-09-16T10:50:55.871Z",
-              "body": "Shipped in PR #2 (dates-module). src/lib/dates.ts is the only place that does date maths: toLocalDate/today, addDays/daysBetween, dueness, isDue/dueItems, requiredToday/requiredItems, and the Schedule type. dueItems derives last-done and the week count from raw check-ins so nothing else picks its own week start. 7 tests on node --test, no framework; engines.node moved to >=22.18 for it.\n\nFollow-ups left for other cards: reminder scheduler should get its HH:MM formatter from here rather than rolling its own Intl; dueItems does not filter archived items; no Intl formatter cache yet."
+              "body": "Shipped in PR #2 (dates-module). src/lib/dates.ts is the only place that does date maths: toLocalDate/today, addDays/daysBetween, dueness, isDue/dueItems, requiredToday/requiredItems, and the Schedule type. dueItems derives last-done and the week count from raw check-ins so nothing else picks its own week start. 12 tests on node --test, no framework; engines.node moved to >=22.18 for it.\n\nFollow-ups left for other cards: reminder scheduler should get its HH:MM formatter from here rather than rolling its own Intl; dueItems does not filter archived items; no Intl formatter cache yet."
             }
           ]
         }

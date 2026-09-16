@@ -1,7 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { addDays, daysBetween, dueItems, dueness, isDue, requiredItems, toLocalDate } from "./dates.ts"
-import type { Schedule } from "./dates.ts"
+import { addDays, daysBetween, dueItems, dueness, isDue, requiredItems, toLocalDate, type Schedule } from "./dates.ts"
 
 const noHistory = { lastDoneDate: null, doneEarlierThisWeek: 0 }
 
