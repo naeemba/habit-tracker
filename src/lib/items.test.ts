@@ -119,6 +119,10 @@ test("a schedule the database should never have holds says so instead of throwin
     { type: "weekdays", days: "1,3" },
     { type: "weekdays", days: [] },
     { type: "weekdays", days: ["1", "5"] },
+    { type: "per_week" },
+    { type: "per_week", count: 0 },
+    { type: "interval" },
+    { type: "interval", days: 0 },
     { type: "monthly" },
   ]
   for (const schedule of unreadable) {

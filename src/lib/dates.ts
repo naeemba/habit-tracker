@@ -105,9 +105,21 @@ export function dueness(lastDoneDate: string | null, localDate: string, interval
  * nothing thrown and nothing logged. Both readers go through here because
  * `requiredToday` returns early for `per_week` and never reaches `isDue`.
  */
-function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number {
+export function weeklyCount(schedule: Extract<Schedule, { type: "per_week" }>): number {
   if (!(schedule.count > 0)) throw new RangeError(`Times per week must be at least one: ${schedule.count}`)
   return schedule.count
+}
+
+/**
+ * The interval, guarded. Twin of `weeklyCount`, for the same untrusted jsonb:
+ * a row with no `days` prints `Every undefined days since last done` on the
+ * list, and a `0` prints `Every 0 days since last done` as if it were a real
+ * schedule while the Today view throws on it. `dueness` rejects the same
+ * values for the day it is asked about.
+ */
+export function intervalDays(schedule: Extract<Schedule, { type: "interval" }>): number {
+  if (!(schedule.days > 0)) throw new RangeError(`Interval must be at least one day: ${schedule.days}`)
+  return schedule.days
 }
 
 /**

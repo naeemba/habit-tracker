@@ -4,7 +4,7 @@
  * Nothing here touches the database or React, so `items.test.ts` can run it
  * under `node --test`. The queries live in `item-queries.ts`.
  */
-import { isWeekday, weekdayList, type Schedule } from "./dates.ts"
+import { intervalDays, isWeekday, weekdayList, weeklyCount, type Schedule } from "./dates.ts"
 
 /** A chore is "every N days since last done"; a habit has a fixed schedule. */
 export type ItemKind = "habit" | "chore"
@@ -168,10 +168,14 @@ export function describeSchedule(schedule: Schedule): string {
         return "Every day"
       case "weekdays":
         return weekdayList(schedule).map(day => WEEKDAY_NAMES[day]).join(", ")
-      case "per_week":
-        return schedule.count === 1 ? "Once a week" : `${schedule.count} times a week`
-      case "interval":
-        return schedule.days === 1 ? "Every day since last done" : `Every ${schedule.days} days since last done`
+      case "per_week": {
+        const count = weeklyCount(schedule)
+        return count === 1 ? "Once a week" : `${count} times a week`
+      }
+      case "interval": {
+        const days = intervalDays(schedule)
+        return days === 1 ? "Every day since last done" : `Every ${days} days since last done`
+      }
       default:
         throw new RangeError(`Unknown schedule type: ${JSON.stringify(schedule)}`)
     }
