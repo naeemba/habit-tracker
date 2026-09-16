@@ -1,6 +1,6 @@
 # Stack Decision
 
-Decided 2026-09-16. Not yet implemented.
+Decided 2026-09-16. Scaffolded 2026-09-16.
 
 ## Choice
 
@@ -36,10 +36,22 @@ Next. Familiarity wins for a personal app maintained for years.
 
 ## What the starter does not give
 
-- No Dockerfile. Write one with Next standalone output.
+- No Dockerfile. Written, with Next standalone output and a non-root user.
 - No PWA, service worker, or Web Push. Add `serwist` and `web-push`.
 - Passkeys need HTTPS and a stable domain. Fine on Coolify; use `localhost`
   in development.
+- Two things the starter does not handle for a containerised deploy, both
+  worked around here and both better fixed upstream:
+  - Its optional peers are loaded in ways the bundler cannot see, so
+    `output: "standalone"` does not trace them. `next.config.ts` walks
+    their dependency tree and feeds it to the tracer. Without that the
+    container boots and then fails on the first sign-in request. The
+    starter should export these globs itself, next to the hidden imports.
+  - `createAuth()` validates its environment at import time, and
+    `next build` imports it while collecting route config, so a build with
+    no secrets fails. The `Dockerfile` sets throwaway values in the builder
+    stage. The starter should skip validation when `NEXT_PHASE` says it is
+    a production build.
 
 ## Libraries to add
 
