@@ -48,7 +48,7 @@ are a fact, not a recomputation.
 |---|---|---|
 | local_date | text | primary key |
 | item_points | integer | sum of points for check-ins that day |
-| bonus | integer | 5 when all due items done, else 0 |
+| bonus | integer | 5 when everything owed that day is done, else 0 |
 
 Total points = sum over ledger minus redeemed goals.
 
@@ -81,7 +81,12 @@ Key/value: `timezone`, `daily_bonus` (default 5). Auth is handled by Better Auth
 ## Derived on read (never stored)
 
 - Due today: habit schedule matches the date, or chore
-  `daysSinceLastDone >= intervalDays` (dueness >= 1).
+  `daysSinceLastDone >= intervalDays` (dueness >= 1). A `per_week` habit is due
+  every day of its week until earlier days meet the count.
+- Owed today (what the bonus checks): due today, minus a `per_week` habit whose
+  remaining count still fits in the days left in the week after today. Gym 3 per week with
+  none done is due on Monday but not owed; on Friday two are left and two days
+  are left, so it is owed.
 - Streak: walk back from today over due days.
 - Strength score: Loop formula, see `research.md` section 1.
 - Pace: `remaining / average points per day over last 14 days`.

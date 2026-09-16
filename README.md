@@ -34,7 +34,10 @@ costs only that day's bonus, never the points already earned.
 ### Points and rewards
 
 - Each completed item earns its points.
-- Daily bonus: +5 when everything due today is done.
+- Daily bonus: +5 when everything owed today is done. A habit of N times a
+  week is listed every day but only owed once the times left no longer fit in
+  the days left in the week, so skipping Monday's gym to go on Tuesday costs
+  nothing.
 - One active reward goal: name, target points, optional picture.
 - Progress bar and "at your current pace: ~N days left".
 - Ledger of points earned per day.
@@ -56,7 +59,7 @@ missed days, multiple reward goals at once. Add when one is missed.
 
 ## Development
 
-Needs Node 20.12+ (for `--env-file-if-exists`) and Docker.
+Needs Node 22.18+ (for running TypeScript without a flag) and Docker.
 
 ```bash
 cp .env.example .env          # then fill in BETTER_AUTH_SECRET

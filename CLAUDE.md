@@ -27,3 +27,6 @@ an alternative.
   the first edit, to Done when the PR is ready.
 - No semicolons in TypeScript or config files. Nothing enforces it yet; add
   Prettier with `"semi": false` when the repo gets a CI job to hang it on.
+- `allowImportingTsExtensions` is on so `node --test` can resolve
+  `./dates.ts`. Write `.ts` import extensions in test files only; app code
+  under `src/app` still compiles with them, then breaks at `next build`.

@@ -1,0 +1,165 @@
+import { test } from "node:test"
+import assert from "node:assert/strict"
+import { addDays, daysBetween, dueItems, dueness, isDue, requiredItems, toLocalDate, type Schedule } from "./dates.ts"
+
+const noHistory = { lastDoneDate: null, doneEarlierThisWeek: 0 }
+
+test("a late-evening instant belongs to the next local day east of UTC", () => {
+  const instant = new Date("2026-09-16T23:30:00Z")
+  assert.equal(toLocalDate(instant, "Europe/Berlin"), "2026-09-17")
+  assert.equal(toLocalDate(instant, "UTC"), "2026-09-16")
+  assert.equal(toLocalDate(instant, "America/New_York"), "2026-09-16")
+})
+
+test("the local day boundary moves with daylight saving", () => {
+  // Berlin is UTC+2 in July and UTC+1 in December, so the same UTC clock time
+  // falls on different local days.
+  assert.equal(toLocalDate(new Date("2026-07-01T22:30:00Z"), "Europe/Berlin"), "2026-07-02")
+  assert.equal(toLocalDate(new Date("2026-12-01T22:30:00Z"), "Europe/Berlin"), "2026-12-01")
+})
+
+test("day maths adds and subtracts whole days", () => {
+  assert.equal(addDays("2026-03-28", 1), "2026-03-29")
+  assert.equal(addDays("2026-03-01", -1), "2026-02-28")
+  assert.equal(daysBetween("2026-03-28", "2026-03-30"), 2)
+  assert.equal(daysBetween("2026-03-30", "2026-03-28"), -2)
+})
+
+test("a chore is due once its interval has passed, and always when never done", () => {
+  assert.equal(dueness("2026-09-02", "2026-09-16", 14), 1)
+  assert.equal(dueness("2026-09-09", "2026-09-16", 14), 0.5)
+  assert.equal(dueness(null, "2026-09-16", 14), Infinity)
+  assert.equal(isDue({ type: "interval", days: 14 }, "2026-09-16", noHistory), true)
+})
+
+test("habit schedules pick their days", () => {
+  assert.equal(isDue({ type: "daily" }, "2026-09-16", noHistory), true)
+  assert.equal(isDue({ type: "weekdays", days: [1, 3, 5] }, "2026-09-16", noHistory), true)
+  assert.equal(isDue({ type: "weekdays", days: [1, 3, 5] }, "2026-09-17", noHistory), false)
+  assert.equal(isDue({ type: "per_week", count: 3 }, "2026-09-16", { lastDoneDate: null, doneEarlierThisWeek: 2 }), true)
+  assert.equal(isDue({ type: "per_week", count: 3 }, "2026-09-16", { lastDoneDate: null, doneEarlierThisWeek: 3 }), false)
+})
+
+test("dueItems derives last done and the week count from check-ins", () => {
+  // 2026-09-16 is a Wednesday; its week starts Sunday 2026-09-13.
+  const items = [
+    { id: "gym", schedule: { type: "per_week", count: 3 } as const },
+    { id: "yoga", schedule: { type: "per_week", count: 3 } as const },
+    { id: "sheets", schedule: { type: "interval", days: 14 } as const },
+    { id: "filter", schedule: { type: "interval", days: 14 } as const },
+  ]
+  const checkIns = [
+    { itemId: "gym", localDate: "2026-09-13" },
+    { itemId: "gym", localDate: "2026-09-14" },
+    { itemId: "gym", localDate: "2026-09-15" },
+    { itemId: "yoga", localDate: "2026-09-12" }, // last week, does not count
+    { itemId: "yoga", localDate: "2026-09-14" },
+    { itemId: "sheets", localDate: "2026-09-02" },
+    { itemId: "filter", localDate: "2026-09-10" },
+  ]
+
+  const due = dueItems(items, "2026-09-16", checkIns).map(item => item.id)
+  assert.deepEqual(due, ["yoga", "sheets"])
+})
+
+test("dueItems ignores check-ins after the date being asked about", () => {
+  const items = [{ id: "sheets", schedule: { type: "interval", days: 14 } as const }]
+  const checkIns = [{ itemId: "sheets", localDate: "2026-09-20" }]
+
+  assert.deepEqual(dueItems(items, "2026-09-16", checkIns), items)
+})
+
+test("doing an item today drops the chore from the list but keeps the habit", () => {
+  // The Today view still needs the habit's row to put a checkmark on; the chore
+  // has restarted its interval and is not wanted again for two days.
+  const items = [
+    { id: "pushups", schedule: { type: "daily" } as const },
+    { id: "gym", schedule: { type: "per_week", count: 3 } as const },
+    { id: "dishes", schedule: { type: "interval", days: 2 } as const },
+  ]
+  // Wednesday 2026-09-16. Gym was done Monday and Tuesday, so the tap today is
+  // the third of three: the week's count is met and the row must still be there.
+  const checkIns = [
+    { itemId: "pushups", localDate: "2026-09-16" },
+    { itemId: "gym", localDate: "2026-09-14" },
+    { itemId: "gym", localDate: "2026-09-15" },
+    { itemId: "gym", localDate: "2026-09-16" },
+    { itemId: "dishes", localDate: "2026-09-16" },
+  ]
+
+  const due = dueItems(items, "2026-09-16", checkIns).map(item => item.id)
+  assert.deepEqual(due, ["pushups", "gym"])
+})
+
+test("a per_week habit leaves the list the day after its count is met", () => {
+  const items = [{ id: "gym", schedule: { type: "per_week", count: 3 } as const }]
+  const checkIns = [
+    { itemId: "gym", localDate: "2026-09-14" },
+    { itemId: "gym", localDate: "2026-09-15" },
+    { itemId: "gym", localDate: "2026-09-16" },
+  ]
+
+  assert.deepEqual(dueItems(items, "2026-09-17", checkIns), [])
+  // Sunday 2026-09-20 starts a new week, so the count resets and gym is back.
+  assert.deepEqual(dueItems(items, "2026-09-20", checkIns).map(item => item.id), ["gym"])
+})
+
+test("bad input throws instead of quietly hiding an item forever", () => {
+  assert.throws(() => addDays("2026-9-16", 1), /Not a local date/)
+  assert.throws(() => daysBetween("2026-02-31", "2026-03-01"), /Not a local date/)
+  assert.throws(() => dueness("2026-09-02", "2026-09-16", 0), /at least one day/)
+  assert.throws(() => toLocalDate(new Date(), ""), /Unknown timezone/)
+  assert.throws(() => toLocalDate(new Date("nonsense"), "Europe/Berlin"), /Not a valid instant/)
+  // The schedule column is JSON text too. A count of 0 used to read as "never
+  // due and never owed", so gym would drop off Today and never come back.
+  const badCount = { type: "per_week", count: 0 } as unknown as Schedule
+  assert.throws(() => isDue(badCount, "2026-09-16", noHistory), /Times per week must be at least one/)
+  // requiredToday returns early for per_week, so it needs its own guard, not isDue's.
+  assert.throws(
+    () => requiredItems([{ id: "gym", schedule: badCount }], "2026-09-16", []),
+    /Times per week must be at least one/,
+  )
+  // Weekdays come off a checkbox form, and HTML form values are strings. A
+  // ["1","3","5"] is an array of the right length that matches no day at all,
+  // so reading would never appear on Today again. An empty list and a [7] are
+  // the same silent nothing from the other directions.
+  const weekdays = (days: unknown) => ({ type: "weekdays", days }) as unknown as Schedule
+  for (const days of [undefined, "1,3,5", ["1", "3", "5"], [], [7], [-1], [1.5]]) {
+    assert.throws(() => isDue(weekdays(days), "2026-09-16", noHistory), /Weekdays must be a non-empty list of days 0-6/)
+  }
+})
+
+test("a malformed check-in date throws instead of reading as a future check-in", () => {
+  // "2026-9-01" sorts after "2026-09-16" as a string, so without the guard this
+  // row would be skipped and the chore would look never-done and always overdue.
+  const items = [{ id: "filter", schedule: { type: "interval", days: 14 } as const }]
+  assert.throws(
+    () => dueItems(items, "2026-09-16", [{ itemId: "filter", localDate: "2026-9-01" }]),
+    /Not a local date: 2026-9-01/,
+  )
+})
+
+test("a per_week habit is only owed once the count left fills the days left", () => {
+  // 3 per week, nothing done. 2026-09-14 is a Monday, 2026-09-18 a Friday.
+  const items = [
+    { id: "pushups", schedule: { type: "daily" } as const },
+    { id: "gym", schedule: { type: "per_week", count: 3 } as const },
+  ]
+
+  // Monday: gym is listed, but Tuesday to Saturday still fit three sessions, so
+  // doing only pushups must not cost the daily bonus.
+  assert.deepEqual(dueItems(items, "2026-09-14", []).map(item => item.id), ["pushups", "gym"])
+  assert.deepEqual(requiredItems(items, "2026-09-14", []).map(item => item.id), ["pushups"])
+
+  // Friday with one done: two left, two days left, so today is one of them.
+  const oneDone = [{ itemId: "gym", localDate: "2026-09-14" }]
+  assert.deepEqual(requiredItems(items, "2026-09-18", oneDone).map(item => item.id), ["pushups", "gym"])
+
+  // Friday with two done: Saturday alone covers the third.
+  const twoDone = [...oneDone, { itemId: "gym", localDate: "2026-09-15" }]
+  assert.deepEqual(requiredItems(items, "2026-09-18", twoDone).map(item => item.id), ["pushups"])
+
+  // Count met by earlier days: not listed, so not owed either.
+  const threeDone = [...twoDone, { itemId: "gym", localDate: "2026-09-16" }]
+  assert.deepEqual(requiredItems(items, "2026-09-18", threeDone).map(item => item.id), ["pushups"])
+})
