@@ -97,6 +97,20 @@ function dependencyClosure(roots: string[]): string[] {
 // does not exist`. The same trap as the auth CLI, one track further along.
 const appMigrationIncludes = ["./drizzle/**/*", "./scripts/migrate.mjs"]
 
+// A glob that matches nothing is silent: the build stays green, the container
+// starts, `/` serves 200, and the first items page dies on the error above.
+// Rename drizzle-kit's `out` directory or move the script and this stops the
+// build instead. It cannot catch a migration that was generated and never
+// committed; nothing cheap can.
+for (const glob of appMigrationIncludes) {
+  const path = glob.replace(/\/\*\*\/\*$/, "")
+  if (!existsSync(join(projectRoot, path))) {
+    throw new Error(
+      `"${path}" is missing — the container would start and then fail on the first items page.`,
+    )
+  }
+}
+
 const runtimeIncludes = [...dependencyClosure(runtimePeers), ...appMigrationIncludes]
 
 // The closure is the only thing keeping the database driver and the migrate
