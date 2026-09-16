@@ -30,10 +30,11 @@ ENV HOSTNAME=0.0.0.0
 RUN addgroup -g 1001 -S nodejs && adduser -u 1001 -S nextjs -G nodejs
 
 # Standalone traces the server plus only the node_modules it actually needs.
-# static/ and public/ are not traced, so they are copied separately.
+# static/ is not traced, so it is copied separately. There is no public/ copy:
+# the directory does not exist yet, and `COPY` fails the build on a missing
+# source. Add the line back with the first real public asset.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 EXPOSE 3000

@@ -31,7 +31,11 @@ const runtimePeers = [
   "@react-email/render",
 ]
 
-// Peers the starter declares optional. Absent is a normal install, not a bug.
+// Peers this app neither installs nor needs, so absent is a normal install.
+// Not the same list as the starter's `peerDependenciesMeta`: that also marks
+// `postgres` and `@better-auth/passkey` optional, and this app depends on both,
+// so a missing one has to fail the build rather than be skipped. Do not add
+// them here to "complete" the list.
 const optionalPeers = new Set([
   "resend",
   "@react-email/components",
@@ -42,18 +46,22 @@ const optionalPeers = new Set([
 // package whenever two dependents need different versions, and the nested copy
 // is the one its parent actually loads — `node_modules/<name>` alone would ship
 // the hoisted version and leave the required one out of the image.
+const projectRoot = process.cwd()
+
 function resolvePackageDirectory(name: string, fromDirectory: string) {
   let directory = fromDirectory
   for (;;) {
     const candidate = join(directory, "node_modules", name)
     if (existsSync(join(candidate, "package.json"))) return candidate
+    // Stop at the project root. A copy found above it — a stray install in a
+    // parent directory or in $HOME — becomes a `./../..` glob that resolves
+    // outside the tracing root and matches nothing, so the package would
+    // silently not ship. Treating it as missing lets the throw below name it.
     const parent = dirname(directory)
-    if (parent === directory) return undefined
+    if (directory === projectRoot || parent === directory) return undefined
     directory = parent
   }
 }
-
-const projectRoot = process.cwd()
 
 function dependencyClosure(roots: string[]): string[] {
   const found = new Set<string>()
