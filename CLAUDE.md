@@ -36,6 +36,12 @@ an alternative.
 - Every relative import inside `src/lib` carries the `.ts` extension, whether a
   test reaches it or not. Two spellings in one folder drift, and the next
   person copies whichever file they opened first.
+- A check-in and its ledger row are not written atomically. `toggleToday` runs
+  `toggleCheckIn` and then `writeLedgerDay` as two commits, so a crash between
+  them leaves that day checked off but unpaid, and only a later tap on the same
+  day fixes it — nothing in the app writes a past day. Give both daos a `tx`
+  parameter and wrap the pair in one `db.transaction` when that stops being
+  acceptable.
 - One `pgTable` per file under `src/lib/schema`, named after the table.
   `drizzle.config.ts` reads them as a glob, so a new table is a new file and
   nothing else.
