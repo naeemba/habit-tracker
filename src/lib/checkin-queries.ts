@@ -8,7 +8,7 @@
 import { and, eq } from "drizzle-orm"
 import { db } from "@naeemba/next-starter/db"
 import { assertItemId } from "./items.ts"
-import { checkIns } from "./schema.ts"
+import { checkIns } from "./schema/checkins.ts"
 import type { TodayCheckIn } from "./today.ts"
 
 /**
@@ -35,6 +35,14 @@ export function listCheckIns(): Promise<TodayCheckIn[]> {
  * pair on (item, day) means the second insert is dropped rather than earning
  * the points twice. The same is what will make an offline queue safe to
  * replay.
+ *
+ * ponytail: a toggle is not order-free. Two overlapping taps on an already
+ * checked row can leave it checked with its note gone — A deletes, B finds
+ * nothing to delete and inserts a fresh row. One user on one phone has to tap
+ * twice inside one round trip to hit it, and the worst case is one lost note.
+ * The fix is for the button to post the state it saw instead of a toggle,
+ * which is also what makes an offline queue safe to replay in any order; do it
+ * when the offline queue lands.
  */
 export async function toggleCheckIn(itemId: string, localDate: string): Promise<void> {
   const removed = await db.delete(checkIns).where(whereCheckIn(itemId, localDate)).returning({ id: checkIns.id })
