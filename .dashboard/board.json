@@ -6,7 +6,7 @@
         {
           "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
           "title": "Points ledger and daily bonus",
-          "notes": "Each completion earns its points. +5 when everything owed that day is done — requiredItems() from src/lib/dates.ts, not dueItems(). A per_week habit is listed every day of its week but only owed once the count left no longer fits in the days left after today (Friday with two left over Friday and Saturday is owed). Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
+          "notes": "Each completion earns its points. +5 when everything owed that day is done \u2014 requiredItems() from src/lib/dates.ts, not dueItems(). A per_week habit is listed every day of its week but only owed once the count left no longer fits in the days left after today (Friday with two left over Friday and Saturday is owed). Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
           "priority": "high",
           "parent": null
         },
@@ -116,16 +116,7 @@
     },
     {
       "name": "Doing",
-      "cards": [
-        {
-          "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
-          "title": "Today view with one-tap check-off",
-          "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
-          "priority": "high",
-          "parent": null,
-          "updatedAt": "2026-09-18T12:21:29.474Z"
-        }
-      ]
+      "cards": []
     },
     {
       "name": "Review",
@@ -169,7 +160,23 @@
           "comments": [
             {
               "at": "2026-09-16T12:07:29.917Z",
-              "body": "Shipped in PR #3 (items-crud). The items table as docs/data-model.md has it, schedule as jsonb. /items lists active items, /items/new and /items/<id> share one form so add and edit cannot validate differently, delete sits on the item page so a mistap cannot reach it.\n\nkind is derived from the schedule, not asked for: the four schedule types already split habits from chores. Every field is validated server-side, and the weekday range now lives once in dates.ts so the form refuses exactly what the read-time guard would throw on. A refused save hands back what was typed, because React empties an uncontrolled form as soon as its action returns.\n\nSecond migration track laid here too: drizzle-kit generates, scripts/migrate.mjs applies with drizzle-orm, next.config drags both into the standalone image, container CMD runs auth first. docs/stack.md explains it. /items is force-dynamic because the build image has no database.\n\nLeft for other cards: no session check yet (sign-in card 0a4a0fb1 — there is a ponytail: note where it goes); hard delete rather than archive (card efd1ae35); no checkins table, so nothing reads dueItems yet."
+              "body": "Shipped in PR #3 (items-crud). The items table as docs/data-model.md has it, schedule as jsonb. /items lists active items, /items/new and /items/<id> share one form so add and edit cannot validate differently, delete sits on the item page so a mistap cannot reach it.\n\nkind is derived from the schedule, not asked for: the four schedule types already split habits from chores. Every field is validated server-side, and the weekday range now lives once in dates.ts so the form refuses exactly what the read-time guard would throw on. A refused save hands back what was typed, because React empties an uncontrolled form as soon as its action returns.\n\nSecond migration track laid here too: drizzle-kit generates, scripts/migrate.mjs applies with drizzle-orm, next.config drags both into the standalone image, container CMD runs auth first. docs/stack.md explains it. /items is force-dynamic because the build image has no database.\n\nLeft for other cards: no session check yet (sign-in card 0a4a0fb1 \u2014 there is a ponytail: note where it goes); hard delete rather than archive (card efd1ae35); no checkins table, so nothing reads dueItems yet."
+            }
+          ]
+        },
+        {
+          "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
+          "title": "Today view with one-tap check-off",
+          "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-18T12:33:11.141Z",
+          "branch": "today-view-with-one-tap-check-off",
+          "pullRequest": 4,
+          "comments": [
+            {
+              "at": "2026-09-18T12:33:11.141Z",
+              "body": "Shipped in PR #4 (today-view-with-one-tap-check-off). The home page is now Today: overdue chores first and riper first, then the habits due today, then what is already done, ties by name so the list does not reshuffle under a thumb. The whole row is the button. The note belongs to the check-in, so it only shows once the item is done, folded away where it cannot sit between a thumb and the row.\n\nNew underneath: the checkins table with UNIQUE(item_id, local_date), which is what makes a tap idempotent and what will make an offline replay safe. src/lib/today.ts decides the list, because dueItems alone is not it \u2014 an interval chore leaves that list the day it is done, so a mistap would take its own row off the screen. dates.ts now exports dueContexts so the chore hint and the due filter read one derivation of last-done.\n\nThe day comes from the server clock and the timezone setting, never from the form. Timezone is the TIMEZONE environment variable until the settings page (card 0ac962d4) holds it; one function to swap.\n\nLeft for the cards that own it: offline check-offs wait on the PWA outbox (fdd1c45f) \u2014 a tap is a server action and needs the network today; the green-to-red chore hint is card c5d5c10b, which this ordering already feeds; points are shown per row but nothing sums them until the ledger (a871063d)."
             }
           ]
         }
