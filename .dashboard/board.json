@@ -4,13 +4,6 @@
       "name": "Todo",
       "cards": [
         {
-          "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
-          "title": "Today view with one-tap check-off",
-          "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
-          "priority": "high",
-          "parent": null
-        },
-        {
           "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
           "title": "Points ledger and daily bonus",
           "notes": "Each completion earns its points. +5 when everything owed that day is done — requiredItems() from src/lib/dates.ts, not dueItems(). A per_week habit is listed every day of its week but only owed once the count left no longer fits in the days left after today (Friday with two left over Friday and Saturday is owed). Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
@@ -119,10 +112,23 @@
     },
     {
       "name": "Ship",
-      "cards": []
+      "cards": [
+        {
+          "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
+          "title": "Today view with one-tap check-off",
+          "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-18T12:19:29.222Z"
+        }
+      ]
     },
     {
       "name": "Doing",
+      "cards": []
+    },
+    {
+      "name": "Review",
       "cards": []
     },
     {
