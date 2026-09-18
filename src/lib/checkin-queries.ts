@@ -8,6 +8,7 @@
 import { and, eq } from "drizzle-orm"
 import { db } from "@naeemba/next-starter/db"
 import { assertItemId } from "./items.ts"
+import { writeLedgerDay } from "./ledger-queries.ts"
 import { checkIns } from "./schema/checkins.ts"
 import type { TodayCheckIn } from "./today.ts"
 
@@ -43,11 +44,18 @@ export function listCheckIns(): Promise<TodayCheckIn[]> {
  * The fix is for the button to post the state it saw instead of a toggle,
  * which is also what makes an offline queue safe to replay in any order; do it
  * when the offline queue lands.
+ *
+ * The day's ledger row is rewritten here rather than by the caller. A tap that
+ * earned its points but left the ledger alone would be worth nothing, and
+ * every future caller — the offline replay, the undo, the reminder — would
+ * have to remember to write it.
  */
 export async function toggleCheckIn(itemId: string, localDate: string): Promise<void> {
   const removed = await db.delete(checkIns).where(whereCheckIn(itemId, localDate)).returning({ id: checkIns.id })
-  if (removed.length > 0) return
-  await db.insert(checkIns).values({ itemId, localDate }).onConflictDoNothing()
+  if (removed.length === 0) {
+    await db.insert(checkIns).values({ itemId, localDate }).onConflictDoNothing()
+  }
+  await writeLedgerDay(localDate)
 }
 
 /** Write the note on a day's check-in. Does nothing when there is no check-in. */
