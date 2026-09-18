@@ -37,13 +37,12 @@ export type LedgerDay = { localDate: string; itemPoints: number; bonus: number }
  * a rest day into the same reward as a day the user cleared.
  */
 export function ledgerDay(items: LedgerItem[], localDate: string, checkIns: CheckIn[]): LedgerDay {
-  const points = new Map(items.map(item => [item.id, item.points]))
   const doneToday = new Set(
     checkIns.filter(checkIn => checkIn.localDate === localDate).map(checkIn => checkIn.itemId),
   )
-
-  let itemPoints = 0
-  for (const itemId of doneToday) itemPoints += points.get(itemId) ?? 0
+  // Summed over the items rather than over the check-ins, so a check-in whose
+  // item row is gone is worth nothing instead of NaN, with nothing to guard.
+  const itemPoints = items.filter(item => doneToday.has(item.id)).reduce((sum, item) => sum + item.points, 0)
 
   // Archived items keep the points of the days they were done, but stop being
   // owed: card efd1ae35 archives instead of deleting so history stays intact,
