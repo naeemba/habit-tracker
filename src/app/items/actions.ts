@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { requireSession } from "@/lib/auth-server"
 import { createItem, deleteItem, updateItem } from "@/lib/item-queries"
 import { parseItemForm, readSubmittedFields, type SubmittedFields } from "@/lib/items"
+import { rewriteToday } from "@/lib/ledger-queries"
 
 // The proxy only checks that a session cookie exists, and an action can be
 // posted without going through any page, so every one of these re-checks.
@@ -40,6 +41,7 @@ export async function saveItem(
 
   if (id === null) await createItem(input)
   else await updateItem(id, input)
+  await rewriteToday()
 
   revalidatePath("/items")
   redirect("/items")
@@ -48,6 +50,7 @@ export async function saveItem(
 export async function removeItem(id: string): Promise<void> {
   await requireSession()
   await deleteItem(id)
+  await rewriteToday()
   revalidatePath("/items")
   redirect("/items")
 }

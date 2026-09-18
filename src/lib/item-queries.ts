@@ -8,15 +8,23 @@
 import { cache } from "react"
 import { asc, eq, isNull } from "drizzle-orm"
 import { db } from "@naeemba/next-starter/db"
-import { today } from "./dates.ts"
 import { assertItemId, isItemId, type ItemInput } from "./items.ts"
-import { writeLedgerDay } from "./ledger-queries.ts"
 import { items, type Item } from "./schema/items.ts"
-import { timezone } from "./settings.ts"
 
 /** Active items, in the order the list shows them. */
 export function listItems(): Promise<Item[]> {
   return db.select().from(items).where(isNull(items.archivedAt)).orderBy(asc(items.name))
+}
+
+/**
+ * Every item, archived ones included, for the ledger.
+ *
+ * A day is paid for the items that were checked off on it, and an item
+ * archived since is still one of them. The filtering of what is *owed* happens
+ * in `ledger.ts`, which needs the archived rows to know to skip them.
+ */
+export function listAllItems(): Promise<Item[]> {
+  return db.select().from(items)
 }
 
 /**
@@ -32,7 +40,6 @@ export const getItem = cache(async (id: string): Promise<Item | undefined> => {
 
 export async function createItem(input: ItemInput): Promise<void> {
   await db.insert(items).values(input)
-  await rewriteToday()
 }
 
 /** Both writers take their id from a URL, so both check it the same way. */
@@ -42,23 +49,9 @@ function whereItemId(id: string) {
 
 export async function updateItem(id: string, input: ItemInput): Promise<void> {
   await db.update(items).set(input).where(whereItemId(id))
-  await rewriteToday()
 }
 
 export async function deleteItem(id: string): Promise<void> {
   await db.delete(items).where(whereItemId(id))
-  await rewriteToday()
 }
 
-/**
- * Today's ledger row again, because an item write moves what today owes.
- *
- * Only today. Yesterday is history and keeps what it paid; today is still
- * being written. Without this, tapping three of four items and then deleting
- * the fourth leaves the bonus unpaid until something else is tapped, and
- * adding a new item after clearing the day leaves a bonus paid for a day that
- * is no longer clear.
- */
-function rewriteToday(): Promise<void> {
-  return writeLedgerDay(today(timezone()))
-}
