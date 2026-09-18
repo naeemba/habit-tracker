@@ -4,7 +4,7 @@
  * Nothing here touches the database or React, so `today.test.ts` can run it
  * under `node --test`. The reads and writes live in `checkin-queries.ts`.
  */
-import { dueContexts, dueItems, dueness, intervalDays, NO_HISTORY, type CheckIn, type Schedule } from "./dates.ts"
+import { dueContexts, dueness, intervalDays, isDue, NO_HISTORY, type CheckIn, type Schedule } from "./dates.ts"
 
 /** A check-in as Today needs it: the day it counts for, and what was typed. */
 export type TodayCheckIn = CheckIn & { note: string | null }
@@ -25,7 +25,7 @@ export type TodayRow<ItemType extends TodayItem> = {
 /**
  * Every row the Today view shows, riper first.
  *
- * `dueItems` is not the whole list. A chore leaves it the moment it is done,
+ * What is due is not the whole list. A chore leaves it the moment it is done,
  * because its interval restarts that day — so a chore tapped by mistake would
  * vanish off the screen with no row left to untap. Anything checked off today
  * is kept in the list for the rest of the day, whatever its schedule says.
@@ -40,25 +40,23 @@ export function todayRows<ItemType extends TodayItem>(
   localDate: string,
   checkIns: TodayCheckIn[],
 ): TodayRow<ItemType>[] {
-  const due = new Set(dueItems(items, localDate, checkIns).map(item => item.id))
+  // `dueItems` would read the check-ins a second time to answer the same
+  // question; the rows need the contexts anyway, for the chore hint.
+  const contexts = dueContexts(checkIns, localDate)
   const doneToday = new Map(
     checkIns.filter(checkIn => checkIn.localDate === localDate).map(checkIn => [checkIn.itemId, checkIn.note]),
   )
-  const contexts = dueContexts(checkIns, localDate)
 
   return items
-    .filter(item => due.has(item.id) || doneToday.has(item.id))
-    .map(item => ({
+    .map(item => ({ item, context: contexts.get(item.id) ?? NO_HISTORY }))
+    .filter(({ item, context }) => doneToday.has(item.id) || isDue(item.schedule, localDate, context))
+    .map(({ item, context }) => ({
       item,
       done: doneToday.has(item.id),
       note: doneToday.get(item.id) ?? null,
       dueness: item.schedule.type !== "interval"
         ? null
-        : dueness(
-            (contexts.get(item.id) ?? NO_HISTORY).lastDoneDate,
-            localDate,
-            intervalDays(item.schedule),
-          ),
+        : dueness(context.lastDoneDate, localDate, intervalDays(item.schedule)),
     }))
     .sort(compareRows)
 }

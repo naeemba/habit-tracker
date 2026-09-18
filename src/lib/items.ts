@@ -34,6 +34,18 @@ export function isItemId(value: unknown): value is string {
 }
 
 /**
+ * The same guard for the queries, which have an id and no way to refuse it
+ * politely. Nothing shows this message: every screen posts ids it just
+ * rendered, so getting here means a replayed request, and a server error is
+ * the right answer to that. The pages are where a missing item is turned into
+ * something a user reads.
+ */
+export function assertItemId(value: unknown): string {
+  if (!isItemId(value)) throw new RangeError(`Not an item id: ${value}`)
+  return value
+}
+
+/**
  * Read a submitted item, or throw a message fit to show the user.
  *
  * Every field is checked here because this is the only door into the table.

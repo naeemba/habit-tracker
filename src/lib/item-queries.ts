@@ -8,7 +8,7 @@
 import { cache } from "react"
 import { asc, eq, isNull } from "drizzle-orm"
 import { db } from "@naeemba/next-starter/db"
-import { isItemId, type ItemInput } from "./items"
+import { assertItemId, isItemId, type ItemInput } from "./items"
 import { items, type Item } from "./schema"
 
 /** Active items, in the order the list shows them. */
@@ -31,17 +31,9 @@ export async function createItem(input: ItemInput): Promise<void> {
   await db.insert(items).values(input)
 }
 
-/**
- * Both writers take their id from a URL, so both check it the same way.
- *
- * Nothing shows this message. A non-uuid never reaches here through the app —
- * the edit page 404s on one — so getting here means a replayed request, and a
- * server error is the right answer to that. The pages are where a missing item
- * is turned into something a user reads.
- */
+/** Both writers take their id from a URL, so both check it the same way. */
 function whereItemId(id: string) {
-  if (!isItemId(id)) throw new RangeError(`Not an item id: ${id}`)
-  return eq(items.id, id)
+  return eq(items.id, assertItemId(id))
 }
 
 export async function updateItem(id: string, input: ItemInput): Promise<void> {

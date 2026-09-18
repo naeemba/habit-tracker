@@ -7,7 +7,7 @@
  */
 import { and, eq } from "drizzle-orm"
 import { db } from "@naeemba/next-starter/db"
-import { isItemId } from "./items.ts"
+import { assertItemId } from "./items.ts"
 import { checkIns } from "./schema.ts"
 import type { TodayCheckIn } from "./today.ts"
 
@@ -36,11 +36,10 @@ export function listCheckIns(): Promise<TodayCheckIn[]> {
  * the points twice. The same is what will make an offline queue safe to
  * replay.
  */
-export async function toggleCheckIn(itemId: string, localDate: string): Promise<boolean> {
+export async function toggleCheckIn(itemId: string, localDate: string): Promise<void> {
   const removed = await db.delete(checkIns).where(whereCheckIn(itemId, localDate)).returning({ id: checkIns.id })
-  if (removed.length > 0) return false
+  if (removed.length > 0) return
   await db.insert(checkIns).values({ itemId, localDate }).onConflictDoNothing()
-  return true
 }
 
 /** Write the note on a day's check-in. Does nothing when there is no check-in. */
@@ -49,13 +48,9 @@ export async function saveCheckInNote(itemId: string, localDate: string, note: s
 }
 
 /**
- * Item ids arrive in a form field, so they are as untrusted as anything else
- * a browser posts. Postgres answers a non-uuid with an error that reaches the
- * user as a 500, which reads like the app is broken rather than like a bad
- * request. Nothing shows this message: the Today view only ever posts ids it
- * just rendered, so getting here means a replayed request.
+ * Item ids arrive in a form field, so they are as untrusted as the ones the
+ * item pages take from a URL, and get the same guard.
  */
 function whereCheckIn(itemId: string, localDate: string) {
-  if (!isItemId(itemId)) throw new RangeError(`Not an item id: ${itemId}`)
-  return and(eq(checkIns.itemId, itemId), eq(checkIns.localDate, localDate))
+  return and(eq(checkIns.itemId, assertItemId(itemId)), eq(checkIns.localDate, localDate))
 }
