@@ -66,6 +66,7 @@ cp .env.example .env          # then fill in BETTER_AUTH_SECRET
 docker compose up -d db       # Postgres on localhost:5435
 npm install
 npm run db:migrate            # creates the auth tables
+npm run db:backfill-ledger    # one-off, for days recorded before the ledger
 npm run dev                   # http://localhost:3000
 ```
 

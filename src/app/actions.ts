@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { requireSession } from "@/lib/auth-server"
 import { saveCheckInNote, toggleCheckIn } from "@/lib/checkin-queries"
 import { today } from "@/lib/dates"
+import { writeLedgerDay } from "@/lib/ledger-queries"
 import { timezone } from "@/lib/settings"
 import { parseNote } from "@/lib/today"
 
@@ -19,7 +20,11 @@ import { parseNote } from "@/lib/today"
  */
 export async function toggleToday(form: FormData): Promise<void> {
   await requireSession()
-  await toggleCheckIn(String(form.get("itemId")), today(timezone()))
+  const localDate = today(timezone())
+  await toggleCheckIn(String(form.get("itemId")), localDate)
+  // A tap that earned its points but left the ledger alone would be worth
+  // nothing, so the two always travel together.
+  await writeLedgerDay(localDate)
   revalidatePath("/")
 }
 

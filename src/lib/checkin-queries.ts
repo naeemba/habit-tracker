@@ -43,11 +43,16 @@ export function listCheckIns(): Promise<TodayCheckIn[]> {
  * The fix is for the button to post the state it saw instead of a toggle,
  * which is also what makes an offline queue safe to replay in any order; do it
  * when the offline queue lands.
+ *
+ * The day's ledger row is not written here. This file owns one table; the day's
+ * row is `writeLedgerDay` in `ledger-queries.ts`, and every caller of this —
+ * the tap, and later the offline replay and the undo — calls that after it.
  */
 export async function toggleCheckIn(itemId: string, localDate: string): Promise<void> {
   const removed = await db.delete(checkIns).where(whereCheckIn(itemId, localDate)).returning({ id: checkIns.id })
-  if (removed.length > 0) return
-  await db.insert(checkIns).values({ itemId, localDate }).onConflictDoNothing()
+  if (removed.length === 0) {
+    await db.insert(checkIns).values({ itemId, localDate }).onConflictDoNothing()
+  }
 }
 
 /** Write the note on a day's check-in. Does nothing when there is no check-in. */

@@ -17,6 +17,17 @@ export function listItems(): Promise<Item[]> {
 }
 
 /**
+ * Every item, archived ones included, for the ledger.
+ *
+ * A day is paid for the items that were checked off on it, and an item
+ * archived since is still one of them. The filtering of what is *owed* happens
+ * in `ledger.ts`, which needs the archived rows to know to skip them.
+ */
+export function listAllItems(): Promise<Item[]> {
+  return db.select().from(items)
+}
+
+/**
  * Cached for the request: the edit page asks for the same row twice, once to
  * title the tab and once to fill the form. Next only dedupes `fetch`, so
  * without this every visit runs the same select twice.
@@ -43,3 +54,4 @@ export async function updateItem(id: string, input: ItemInput): Promise<void> {
 export async function deleteItem(id: string): Promise<void> {
   await db.delete(items).where(whereItemId(id))
 }
+

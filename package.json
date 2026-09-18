@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node --env-file-if-exists=.env node_modules/.bin/next-starter migrate && node --env-file-if-exists=.env scripts/migrate.mjs",
+    "db:backfill-ledger": "node --env-file-if-exists=.env scripts/backfill-ledger.ts",
     "test": "node --test \"src/**/*.test.ts\"",
     "db:generate": "node --env-file-if-exists=.env node_modules/.bin/drizzle-kit generate"
   },

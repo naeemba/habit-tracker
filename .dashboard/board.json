@@ -4,13 +4,6 @@
       "name": "Todo",
       "cards": [
         {
-          "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
-          "title": "Points ledger and daily bonus",
-          "notes": "Each completion earns its points. +5 when everything owed that day is done \u2014 requiredItems() from src/lib/dates.ts, not dueItems(). A per_week habit is listed every day of its week but only owed once the count left no longer fits in the days left after today (Friday with two left over Friday and Saturday is owed). Ledger per day.\n\nSee docs/data-model.md (ledger). Write the ledger row on each check-in change, do not recompute.",
-          "priority": "high",
-          "parent": null
-        },
-        {
           "id": "2934b855-641b-4553-9be1-9fddda8945d8",
           "title": "Reward goal with progress",
           "notes": "One active goal: name, target, picture. Progress bar, pace estimate, redeem with reset or carry over.",
@@ -179,6 +172,16 @@
               "body": "Shipped in PR #4 (today-view-with-one-tap-check-off). The home page is now Today: overdue chores first and riper first, then the habits due today, then what is already done, ties by name so the list does not reshuffle under a thumb. The whole row is the button. The note belongs to the check-in, so it only shows once the item is done, folded away where it cannot sit between a thumb and the row.\n\nNew underneath: the checkins table with UNIQUE(item_id, local_date), which is what makes a tap idempotent and what will make an offline replay safe. src/lib/today.ts decides the list, because dueItems alone is not it \u2014 an interval chore leaves that list the day it is done, so a mistap would take its own row off the screen. dates.ts now exports dueContexts so the chore hint and the due filter read one derivation of last-done.\n\nThe day comes from the server clock and the timezone setting, never from the form. Timezone is the TIMEZONE environment variable until the settings page (card 0ac962d4) holds it; one function to swap.\n\nLeft for the cards that own it: offline check-offs wait on the PWA outbox (fdd1c45f) \u2014 a tap is a server action and needs the network today; the green-to-red chore hint is card c5d5c10b, which this ordering already feeds; points are shown per row but nothing sums them until the ledger (a871063d)."
             }
           ]
+        },
+        {
+          "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
+          "title": "Points ledger and daily bonus",
+          "notes": "Ready in PR #5 (points-ledger-and-daily-bonus). New `ledger` table, one row per day: item_points plus a 5-point bonus when everything owed that day is done. Owed is requiredItems, not dueItems, so a per_week habit only costs the bonus once the count left no longer fits in the days left.\n\nThe row is written inside toggleCheckIn, so the offline replay and the undo get it for free. Item writes rewrite today's row and only today's \u2014 yesterday keeps what it paid. Archived items keep the points of the days they were done and stop being owed.\n\nToday's header shows what the day earned, read from the ledger. Migration drizzle/0002_serious_paper_doll.sql.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-18T13:21:00.784Z",
+          "branch": "points-ledger-and-daily-bonus",
+          "pullRequest": 5
         }
       ]
     }

@@ -4,6 +4,7 @@ import { listCheckIns } from "@/lib/checkin-queries"
 import { today } from "@/lib/dates"
 import { listItems } from "@/lib/item-queries"
 import { describeSchedule } from "@/lib/items"
+import { pointsOn } from "@/lib/ledger-queries"
 import { timezone } from "@/lib/settings"
 import { NOTE_MAXIMUM_LENGTH, todayRows } from "@/lib/today"
 import { saveTodayNote, toggleToday } from "./actions"
@@ -20,7 +21,10 @@ export default async function TodayPage() {
   await requireSession()
 
   const localDate = today(timezone())
-  const [items, checkIns] = await Promise.all([listItems(), listCheckIns()])
+  // The day's points are read from the ledger, not summed here. The check-off
+  // wrote them, so the header shows what the day actually paid — including the
+  // daily bonus, which appears the moment the last owed item is tapped.
+  const [items, checkIns, points] = await Promise.all([listItems(), listCheckIns(), pointsOn(localDate)])
   const rows = todayRows(items, localDate, checkIns)
   // Listed is not owed. A `per_week` habit keeps its row every day of its
   // week, so counting the undone rows would say "1 left" on a day the user
@@ -32,7 +36,7 @@ export default async function TodayPage() {
       <h1 className="flex items-baseline justify-between gap-3 text-2xl font-semibold tracking-tight">
         Today
         <span className="text-base font-normal tabular-nums opacity-70">
-          {rows.length === 0 ? "" : left === 0 ? "all done" : `${left} left`}
+          {rows.length === 0 ? "" : `${left === 0 ? "all done" : `${left} left`} · ${points}p`}
         </span>
       </h1>
 
