@@ -18,3 +18,13 @@
 export function timezone(): string {
   return process.env.TIMEZONE ?? Intl.DateTimeFormat().resolvedOptions().timeZone
 }
+
+/**
+ * What a day is worth on top of its items when everything owed that day is
+ * done. docs/data-model.md calls it `daily_bonus`; the settings page (card
+ * 0ac962d4) is where it becomes editable.
+ *
+ * It is read at the moment a day's ledger row is written, so changing it later
+ * never rewrites what an earlier day already paid out.
+ */
+export const DAILY_BONUS = 5
