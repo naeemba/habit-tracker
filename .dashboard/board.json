@@ -112,6 +112,10 @@
     },
     {
       "name": "Ship",
+      "cards": []
+    },
+    {
+      "name": "Doing",
       "cards": [
         {
           "id": "52794dcb-1ca5-4910-a0e6-9598c2e93b0d",
@@ -119,13 +123,9 @@
           "notes": "List of items due today, overdue chores on top. Tap toggles done. Optional note.",
           "priority": "high",
           "parent": null,
-          "updatedAt": "2026-09-18T12:19:29.222Z"
+          "updatedAt": "2026-09-18T12:21:29.474Z"
         }
       ]
-    },
-    {
-      "name": "Doing",
-      "cards": []
     },
     {
       "name": "Review",
