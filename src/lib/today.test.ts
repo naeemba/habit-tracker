@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { todayRows, type TodayCheckIn } from "./today.ts"
+import { NOTE_MAXIMUM_LENGTH, parseNote, todayRows, type TodayCheckIn } from "./today.ts"
 import type { Schedule } from "./dates.ts"
 
 // A Wednesday, so a weekday habit on [3] is due and one on [1] is not.
@@ -91,4 +91,11 @@ test("yesterday's check-in does not mark today done", () => {
 
   assert.equal(rows[0].done, false)
   assert.equal(rows[0].note, null)
+})
+
+test("a blank note is no note, and an over-long one is refused", () => {
+  assert.equal(parseNote("  "), null)
+  assert.equal(parseNote(null), null)
+  assert.equal(parseNote("  ran 5k  "), "ran 5k")
+  assert.throws(() => parseNote("x".repeat(NOTE_MAXIMUM_LENGTH + 1)), RangeError)
 })

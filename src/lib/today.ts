@@ -75,3 +75,20 @@ function compareRows(left: TodayRow<TodayItem>, right: TodayRow<TodayItem>): num
   }
   return left.item.name.localeCompare(right.item.name)
 }
+
+/**
+ * A note is a reminder of what happened, not a diary. The form stops a longer
+ * one with `maxLength`; this is the same limit on the side that a replayed
+ * request cannot skip.
+ */
+export const NOTE_MAXIMUM_LENGTH = 200
+
+/** Read a submitted note. Blank means no note, not an empty one. */
+export function parseNote(value: unknown): string | null {
+  const note = typeof value === "string" ? value.trim() : ""
+  if (note === "") return null
+  if (note.length > NOTE_MAXIMUM_LENGTH) {
+    throw new RangeError(`A note can be at most ${NOTE_MAXIMUM_LENGTH} characters.`)
+  }
+  return note
+}

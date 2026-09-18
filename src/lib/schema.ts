@@ -4,7 +4,7 @@
  * tracks never collide. See docs/stack.md.
  */
 import { integer, jsonb, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core"
-import type { Schedule } from "./dates"
+import type { Schedule } from "./dates.ts"
 
 /**
  * Columns follow docs/data-model.md. `schedule` is jsonb rather than text so
