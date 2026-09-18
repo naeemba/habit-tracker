@@ -1,16 +1,15 @@
 /**
- * This app's own tables. The auth tables are not here: the starter owns them
- * and migrates them through its own CLI and its own journal table, so the two
+ * The `items` table. The auth tables are not here: the starter owns them and
+ * migrates them through its own CLI and its own journal table, so the two
  * tracks never collide. See docs/stack.md.
- */
-import { integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
-import type { Schedule } from "./dates"
-
-/**
+ *
  * Columns follow docs/data-model.md. `schedule` is jsonb rather than text so
  * nothing has to parse it on the way out; the shape is still untrusted, which
  * is why `dates.ts` guards every field it reads.
  */
+import { integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import type { Schedule } from "../dates.ts"
+
 export const items = pgTable("items", {
   id: uuid("id").primaryKey().defaultRandom(),
   kind: text("kind", { enum: ["habit", "chore"] }).notNull(),

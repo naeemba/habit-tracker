@@ -8,6 +8,13 @@
       "when": 1789559511845,
       "tag": "0000_nifty_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789734177257,
+      "tag": "0001_mature_mantis",
+      "breakpoints": true
     }
   ]
 }

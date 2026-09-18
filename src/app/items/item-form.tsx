@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 import { WEEKDAY_NAMES } from "@/lib/items"
-import type { Item } from "@/lib/schema"
+import type { Item } from "@/lib/schema/items"
 import { saveItem, type SaveResult } from "./actions"
 
 const fieldClassName = "w-full rounded-lg border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 text-base"

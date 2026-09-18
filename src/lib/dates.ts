@@ -248,9 +248,24 @@ function selectItems<ItemType extends { id: string; schedule: Schedule }>(
   checkIns: CheckIn[],
   wanted: (schedule: Schedule, localDate: string, context: DueContext) => boolean,
 ): ItemType[] {
+  const contexts = dueContexts(checkIns, localDate)
+  return items.filter(item => wanted(item.schedule, localDate, contexts.get(item.id) ?? NO_HISTORY))
+}
+
+/** An item nothing has ever been logged against. Frozen: callers share it. */
+export const NO_HISTORY: DueContext = Object.freeze({ lastDoneDate: null, doneEarlierThisWeek: 0 })
+
+/**
+ * What every item's own check-ins say about a local date, keyed by item id.
+ *
+ * Exported because the Today view needs one item's last-done date to show how
+ * overdue a chore is, and a second derivation of "last done" would be a second
+ * answer to it. An item with no check-ins is absent from the map, not
+ * `NO_HISTORY` — callers fall back themselves.
+ */
+export function dueContexts(checkIns: CheckIn[], localDate: string): Map<string, DueContext> {
   const firstDayOfWeek = weekStart(localDate)
-  const lastDoneDates = new Map<string, string>()
-  const earlierWeeklyCounts = new Map<string, number>()
+  const contexts = new Map<string, DueContext>()
 
   for (const checkIn of checkIns) {
     // These are compared as strings, and a malformed one compares wrong rather
@@ -258,19 +273,16 @@ function selectItems<ItemType extends { id: string; schedule: Schedule }>(
     // a future check-in and is dropped. Parse it first so the guard sees it.
     parse(checkIn.localDate)
     if (checkIn.localDate > localDate) continue
-    const lastDoneDate = lastDoneDates.get(checkIn.itemId)
-    if (lastDoneDate === undefined || checkIn.localDate > lastDoneDate) {
-      lastDoneDates.set(checkIn.itemId, checkIn.localDate)
+
+    const context = contexts.get(checkIn.itemId) ?? { lastDoneDate: null, doneEarlierThisWeek: 0 }
+    if (context.lastDoneDate === null || checkIn.localDate > context.lastDoneDate) {
+      context.lastDoneDate = checkIn.localDate
     }
     if (checkIn.localDate >= firstDayOfWeek && checkIn.localDate < localDate) {
-      earlierWeeklyCounts.set(checkIn.itemId, (earlierWeeklyCounts.get(checkIn.itemId) ?? 0) + 1)
+      context.doneEarlierThisWeek += 1
     }
+    contexts.set(checkIn.itemId, context)
   }
 
-  return items.filter(item =>
-    wanted(item.schedule, localDate, {
-      lastDoneDate: lastDoneDates.get(item.id) ?? null,
-      doneEarlierThisWeek: earlierWeeklyCounts.get(item.id) ?? 0,
-    }),
-  )
+  return contexts
 }

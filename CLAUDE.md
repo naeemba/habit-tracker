@@ -33,3 +33,9 @@ an alternative.
   not just the entry. `next build` and the Docker build both handle that.
   Nothing under `src/app` may use it: it compiles and then breaks at
   `next build`.
+- Every relative import inside `src/lib` carries the `.ts` extension, whether a
+  test reaches it or not. Two spellings in one folder drift, and the next
+  person copies whichever file they opened first.
+- One `pgTable` per file under `src/lib/schema`, named after the table.
+  `drizzle.config.ts` reads them as a glob, so a new table is a new file and
+  nothing else.
