@@ -8,8 +8,8 @@
 import { cache } from "react"
 import { asc, eq, isNull } from "drizzle-orm"
 import { db } from "@naeemba/next-starter/db"
-import { assertItemId, isItemId, type ItemInput } from "./items"
-import { items, type Item } from "./schema"
+import { assertItemId, isItemId, type ItemInput } from "./items.ts"
+import { items, type Item } from "./schema/items.ts"
 
 /** Active items, in the order the list shows them. */
 export function listItems(): Promise<Item[]> {
