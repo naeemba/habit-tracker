@@ -93,6 +93,19 @@ test("yesterday's check-in does not mark today done", () => {
   assert.equal(rows[0].note, null)
 })
 
+test("a per_week habit is listed every day but only required once the week runs out", () => {
+  const items = [item("1", "Gym", { type: "per_week", count: 3 })]
+
+  // Wednesday, nothing done: three left and four days to fit them in.
+  const early = todayRows(items, wednesday, [])
+  assert.equal(early.length, 1)
+  assert.equal(early[0].required, false)
+
+  // Friday, nothing done: three left and three days, so today is owed.
+  const late = todayRows(items, "2026-09-18", [])
+  assert.equal(late[0].required, true)
+})
+
 test("a blank note is no note, and an over-long one is refused", () => {
   assert.equal(parseNote("  "), null)
   assert.equal(parseNote(null), null)

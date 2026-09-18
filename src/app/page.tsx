@@ -22,7 +22,10 @@ export default async function TodayPage() {
   const localDate = today(timezone())
   const [items, checkIns] = await Promise.all([listItems(), listCheckIns()])
   const rows = todayRows(items, localDate, checkIns)
-  const left = rows.filter(row => !row.done).length
+  // Listed is not owed. A `per_week` habit keeps its row every day of its
+  // week, so counting the undone rows would say "1 left" on a day the user
+  // owes nothing; `required` is the same question the daily bonus asks.
+  const left = rows.filter(row => row.required && !row.done).length
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 space-y-6 p-4">
@@ -48,10 +51,13 @@ export default async function TodayPage() {
                   aria-pressed={done}
                   className="flex w-full items-center gap-3 p-4 text-left"
                 >
+                  {/* No fill when it is done: a ✓ in the page's own text colour on a
+                      mid-tone item colour is about 3:1, and the circle is what the
+                      thumb aims at. The ring carries the item's colour either way. */}
                   <span
                     aria-hidden
                     className="grid size-11 shrink-0 place-items-center rounded-full border-2 text-2xl"
-                    style={{ borderColor: item.color, backgroundColor: done ? item.color : undefined }}
+                    style={{ borderColor: item.color }}
                   >
                     {done ? "✓" : item.icon}
                   </span>

@@ -4,7 +4,16 @@
  * Nothing here touches the database or React, so `today.test.ts` can run it
  * under `node --test`. The reads and writes live in `checkin-queries.ts`.
  */
-import { dueContexts, dueness, intervalDays, isDue, NO_HISTORY, type CheckIn, type Schedule } from "./dates.ts"
+import {
+  dueContexts,
+  dueness,
+  intervalDays,
+  isDue,
+  NO_HISTORY,
+  requiredToday,
+  type CheckIn,
+  type Schedule,
+} from "./dates.ts"
 
 /** A check-in as Today needs it: the day it counts for, and what was typed. */
 export type TodayCheckIn = CheckIn & { note: string | null }
@@ -18,6 +27,12 @@ export type TodayRow<ItemType extends TodayItem> = {
   done: boolean
   /** The note on today's check-in, if there is one. */
   note: string | null
+  /**
+   * Whether leaving this one untapped today costs the daily bonus. Listed is
+   * not owed: a `per_week` habit is listed every day of its week, so the count
+   * in the header has to ask this rather than count the rows.
+   */
+  required: boolean
   /** How overdue, for chores. Null for habits, which have no interval. */
   dueness: number | null
 }
@@ -54,6 +69,7 @@ export function todayRows<ItemType extends TodayItem>(
       item,
       done: doneToday.has(item.id),
       note: doneToday.get(item.id) ?? null,
+      required: requiredToday(item.schedule, localDate, context),
       dueness: item.schedule.type !== "interval"
         ? null
         : dueness(context.lastDoneDate, localDate, intervalDays(item.schedule)),
