@@ -64,6 +64,16 @@ test("a chore that is not ripe yet is not owed", () => {
   assert.equal(ledgerDay(items, wednesday, checkIns).bonus, DAILY_BONUS)
 })
 
+test("an overdue chore left undone costs the bonus", () => {
+  const items = [item("1", 3, { type: "daily" }), item("2", 5, { type: "interval", days: 14 })]
+
+  // Last done six weeks back, so it is well past due.
+  assert.equal(ledgerDay(items, wednesday, [checkIn("1", wednesday), checkIn("2", "2026-08-01")]).bonus, 0)
+  // Never done at all, which is infinitely overdue — the state a chore is in
+  // the day it is added.
+  assert.equal(ledgerDay(items, wednesday, [checkIn("1", wednesday)]).bonus, 0)
+})
+
 test("a per_week habit with room left in the week is not owed yet", () => {
   // Gym three times a week, nothing done, on a Wednesday: four days are left
   // and three are owed, so skipping today costs nothing.
