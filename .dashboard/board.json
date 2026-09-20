@@ -7,8 +7,15 @@
           "id": "2934b855-641b-4553-9be1-9fddda8945d8",
           "title": "Reward goal with progress",
           "notes": "One active goal: name, target, picture. Progress bar, pace estimate, redeem with reset or carry over.",
-          "priority": "medium",
-          "parent": null
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:29:10.332Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:29:10.332Z",
+              "body": "Raised to high: the whole reason for the points is a reward to spend them on, and the app shows a number with nothing to add it up toward. Reads its total from the ledger screen card, so take that one first or with it."
+            }
+          ]
         },
         {
           "id": "41f48e93-176f-4684-b5e6-6398fa361334",
@@ -20,30 +27,46 @@
         {
           "id": "fdd1c45f-ffc6-417c-8e52-fb26c3f58d15",
           "title": "PWA: install, offline, sync",
-          "notes": "Manifest, service worker, offline check-offs queued in an IndexedDB outbox and replayed from the page on reconnect. docs/research.md section 5.",
-          "priority": "medium",
-          "parent": null
+          "notes": "Install and home screen only. The offline outbox is its own card now, because the manifest is an afternoon and the outbox is the biggest job on the board.\n\nHere: web manifest, icons (there is no public/ directory yet, and the Dockerfile skips the copy until one exists), a minimal service worker that caches the shell, and the install prompt on Android Chrome. Full screen, no browser bars.\n\nThis is also what the push cards wait on: no service worker, no push handler.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:02.641Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:28:02.641Z",
+              "body": "Raised to high and narrowed to the install half. The whole point is an icon on the phone, and the manifest is cheap; bundling it with the outbox kept a one-afternoon job behind a one-week job. Offline moved to its own card."
+            }
+          ]
         },
         {
           "id": "d836e201-e6ae-4ede-803a-770c51298485",
           "title": "Push reminders",
-          "notes": "Per-item reminder time. Standard Web Push with VAPID and a service worker push handler. Android Chrome only. docs/research.md section 4.",
+          "notes": "Per-item reminder time. Standard Web Push with VAPID and a service worker push handler. Android Chrome only. docs/research.md section 4.\n\nWaits on the PWA install card: no service worker, no push handler. The reminder_time column is already on items, and the push_subscriptions table from docs/data-model.md is not built yet.\n\nThis card is the client half, subscribe and receive. The server half that decides when to send is card 5ad6adb6.",
           "priority": "medium",
-          "parent": null
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:35.028Z"
         },
         {
           "id": "0a4a0fb1-f7c7-4cf3-b5a2-5a420dabcccd",
           "title": "Sign-in via next-starter singleAdmin",
-          "notes": "createAuth({ singleAdmin: '<email>', passkey: { rpName: 'Habit Tracker' } }). Passkey primary, magic link backup. No custom password code.",
-          "priority": "medium",
-          "parent": null
+          "notes": "createAuth({ singleAdmin: \"<email>\", passkey: { rpName: \"Habit Tracker\" } }). Passkey primary, magic link backup. No custom password code.\n\nBlocks the deploy. singleAdmin is commented out in src/lib/auth.ts, so the magic link plugin runs with no allowlist: anyone who finds the URL types any email and is let in. No domain table carries a user_id (docs/data-model.md says one user on purpose), so the second account to sign in is not a fresh tracker, it is this one.\n\nWithout RESEND_API_KEY the starter falls back to its console transport and prints the link into the container log, so sign-in works only by reading logs. Decide passkey plus a real Resend key, or passkey only.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:08.790Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:28:08.790Z",
+              "body": "Raised to high: this is the gate on deploying at all. An open sign-in on a single-user app with no user_id means a stranger lands in the same items and can delete them."
+            }
+          ]
         },
         {
           "id": "51fbae48-c365-43f4-9d9e-3d7c2129c321",
           "title": "Export to JSON",
-          "notes": "Dump all items, check-ins, ledger, goals.",
+          "notes": "Dump all items, check-ins, ledger, goals as JSON.\n\nThis is a copy to read, not a restore: nothing reads the file back, and there is no import card. Real recovery is the Coolify database backup (docs/stack.md). Say so on the button, so a year of history is not trusted to a download that cannot be loaded.",
           "priority": "low",
-          "parent": null
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:24.544Z"
         },
         {
           "id": "db3d43af-14e8-40da-9fb7-5d8ab839d1d5",
@@ -55,16 +78,30 @@
         {
           "id": "b83f7f75-15cb-4da9-8f81-345952be165f",
           "title": "Coolify deployment",
-          "notes": "Dockerfile with Next standalone output, non-root user. Coolify Postgres service, DATABASE_URL from Coolify. Environment documented in .env.example. docs/stack.md.",
-          "priority": "medium",
-          "parent": null
+          "notes": "Coolify Postgres service, DATABASE_URL from Coolify, app container from the Dockerfile that is already here (standalone output, non-root, both migration tracks run from CMD before the server starts). docs/stack.md.\n\nSet TIMEZONE. The container is UTC, and src/lib/settings.ts falls back to the machine zone, so on Berlin time the day would roll over at 2am and a late tap would land on yesterday.\n\nSet BETTER_AUTH_URL to the real https host: passkeys bind to it, and a later change invalidates every passkey already registered. Do the sign-in card first or the URL is open to anyone.\n\nAdd a health endpoint for Coolify to poll, and check the database backup schedule is on.",
+          "priority": "high",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:17.556Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:28:17.556Z",
+              "body": "Raised to high: nothing on this board can be used until it is deployed, and the image side is already built and verified in Docker from PR #1."
+            }
+          ]
         },
         {
           "id": "c5d5c10b-e3af-49d4-b39f-fa0e587fc725",
           "title": "Chore dueness and Today sort order",
-          "notes": "dueness = daysSinceLastDone / intervalDays. Overdue chores first, then due habits, then done items. Show a green-to-red hint per chore.",
-          "priority": "medium",
-          "parent": null
+          "notes": "Only the ripeness hint is left. The ordering shipped in PR #4: src/lib/today.ts puts overdue chores first and riper first, then the habits due today, then what is already done, ties by name. dueness is in src/lib/dates.ts and todayRows already carries it on every row.\n\nWhat is missing is the visual: a green-to-red cue per chore so a glance says which one has waited longest. Feeds off row.dueness, no new query.",
+          "priority": "low",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:27:53.778Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:27:53.778Z",
+              "body": "Dropped to low: most of this card shipped with the Today view, and what is left is one visual cue rather than behaviour."
+            }
+          ]
         },
         {
           "id": "54d5f525-3f60-44eb-b6bd-1aa54c2c4bfe",
@@ -83,23 +120,69 @@
         {
           "id": "0ac962d4-5fc9-4132-b657-e03f10e12cfb",
           "title": "Settings page",
-          "notes": "Timezone, daily bonus value, password change, push subscribe button, export link.",
+          "notes": "The settings table from docs/data-model.md, key/value: timezone and daily_bonus.\n\nBoth live in code today. src/lib/settings.ts reads TIMEZONE from the environment and exports DAILY_BONUS = 5; the swap is the body of those two functions and nothing else reads either value. A changed bonus must not rewrite days already paid: it is read when a day is written, so leave past ledger rows alone.\n\nNo password field. Auth is passkey plus magic link, the starter owns it. The page holds the push subscribe button and the export link instead.",
           "priority": "medium",
-          "parent": null
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:24.520Z"
         },
         {
           "id": "efd1ae35-f25f-4f73-a200-f55d9d7cc76b",
           "title": "Archive items instead of deleting",
-          "notes": "archived_at keeps history and ledger intact. Archived items hidden from Today.",
-          "priority": "low",
-          "parent": null
+          "notes": "Swap the delete button on the item page for archive. archived_at already exists on the items table and listItems already filters on it, so this card is the UI and the action, not the schema.\n\nWhy it matters now: the checkins foreign key is ON DELETE CASCADE, so deleting an item erases every check-in it ever had. The ledger keeps the points that were already paid, but the history behind them is gone, and the item page is one mistap away from it.",
+          "priority": "medium",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:28:35.009Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:28:35.009Z",
+              "body": "Raised to low-plus-one (medium): the column and the filter are already in, so what is left is small, and until it lands a single mistap on the item page takes a year of check-ins with it."
+            }
+          ]
         },
         {
-          "id": "4ece4621-b1a8-4544-98c4-c657f38af915",
-          "title": "Undo a check-off",
-          "notes": "Tap again within the day removes the check-in and rewrites that day's ledger row.",
+          "id": "8a634e65-2532-484a-b3bd-23bbac0b1404",
+          "title": "Offline check-offs: outbox and replay",
+          "notes": "A tap must succeed with no network and sync later. It is a server action today, so on a train it just fails. docs/research.md section 5.\n\nQueue taps in an IndexedDB outbox and replay them from the page on reconnect. Two things in the way, both already known:\n\n- The check-in id is generated server-side (defaultRandom on the checkins table). docs/data-model.md asks for a client-generated id so a replayed tap dedupes on its own id, not only on the unique pair.\n- The tap posts \"flip it\", not \"I saw it unchecked\". Two queued taps replayed out of order can land on the wrong state, and the same race can drop a note. src/lib/checkin-queries.ts says to make the button post the state it saw, and says to do it when this card lands.\n\nEach replay must call writeLedgerDay for the day it wrote, or the points never appear.",
           "priority": "medium",
-          "parent": null
+          "parent": null,
+          "createdAt": "2026-09-20T12:28:44.149Z",
+          "updatedAt": "2026-09-20T12:28:44.149Z"
+        },
+        {
+          "id": "d962a735-4f49-42ce-a58b-470e17c13e5d",
+          "title": "Points ledger screen",
+          "notes": "The README promises a ledger of points earned per day and nothing shows it. The table is written on every tap (src/lib/ledger-queries.ts) and the only thing that reads it is the \"14p\" in the Today header.\n\nA page listing each day: items points, bonus, day total, and a running total. Total points = sum over the ledger minus redeemed goals, per docs/data-model.md, so this is also where the reward goal reads its number from. Build it before or with the goal card, not after.",
+          "priority": "medium",
+          "parent": null,
+          "createdAt": "2026-09-20T12:28:47.122Z",
+          "updatedAt": "2026-09-20T12:28:47.122Z"
+        },
+        {
+          "id": "db8d434c-fb35-4b92-b7c5-b95c662f701a",
+          "title": "CI: run the tests and the build on every push",
+          "notes": "There are 48 tests on node --test and nothing runs them but a person remembering to. A GitHub Actions job on push and on pull request: npm ci, npm test, npm run lint, npm run build.\n\nCLAUDE.md parks Prettier with \"semi\": false until there is a CI job to hang it on, so that rule starts being enforced here.\n\nThe build step needs the same throwaway environment values the Dockerfile builder stage sets, because createAuth validates its environment at import time and next build imports it.",
+          "priority": "medium",
+          "parent": null,
+          "createdAt": "2026-09-20T12:28:55.406Z",
+          "updatedAt": "2026-09-20T12:28:55.406Z"
+        },
+        {
+          "id": "352a9b00-c13f-4544-aa4a-5ca904557acc",
+          "title": "Write a check-in and its ledger row in one transaction",
+          "notes": "toggleToday runs toggleCheckIn and then writeLedgerDay as two separate commits. Crash in between and the day is checked off but unpaid. Nothing in the app writes a past day, so only another tap on that same day repairs it, and scripts/backfill-ledger.ts is the manual way out.\n\nThe fix is named in CLAUDE.md: give both query modules a tx parameter and wrap the pair in one db.transaction. Low because one user on one phone rarely catches the gap, but it is recorded as accepted debt and accepted debt with no card gets rediscovered instead of fixed.",
+          "priority": "low",
+          "parent": null,
+          "createdAt": "2026-09-20T12:28:55.428Z",
+          "updatedAt": "2026-09-20T12:28:55.428Z"
+        },
+        {
+          "id": "20eb466a-84e6-4ac3-999f-4c8a97bea86d",
+          "title": "Tick a day you missed",
+          "notes": "A scope decision, not a bug. Nothing in the app writes a check-in for a past day: the day always comes from the server clock and the timezone setting, on purpose, so a replayed request cannot write points onto any day it likes.\n\nWhat that costs: fall asleep before tapping the last chore and Tuesday is closed for good, with the daily bonus gone and no screen that can fix it.\n\nIf it should be possible, the design has to keep the guard: an explicit edit on the item page or the ledger screen, bounded to the last few days, rewriting that days ledger row after the write. The README does not list it, so decide before building it.",
+          "priority": "low",
+          "parent": null,
+          "createdAt": "2026-09-20T12:29:05.279Z",
+          "updatedAt": "2026-09-20T12:29:05.279Z"
         }
       ]
     },
@@ -153,7 +236,7 @@
           "comments": [
             {
               "at": "2026-09-16T12:07:29.917Z",
-              "body": "Shipped in PR #3 (items-crud). The items table as docs/data-model.md has it, schedule as jsonb. /items lists active items, /items/new and /items/<id> share one form so add and edit cannot validate differently, delete sits on the item page so a mistap cannot reach it.\n\nkind is derived from the schedule, not asked for: the four schedule types already split habits from chores. Every field is validated server-side, and the weekday range now lives once in dates.ts so the form refuses exactly what the read-time guard would throw on. A refused save hands back what was typed, because React empties an uncontrolled form as soon as its action returns.\n\nSecond migration track laid here too: drizzle-kit generates, scripts/migrate.mjs applies with drizzle-orm, next.config drags both into the standalone image, container CMD runs auth first. docs/stack.md explains it. /items is force-dynamic because the build image has no database.\n\nLeft for other cards: no session check yet (sign-in card 0a4a0fb1 \u2014 there is a ponytail: note where it goes); hard delete rather than archive (card efd1ae35); no checkins table, so nothing reads dueItems yet."
+              "body": "Shipped in PR #3 (items-crud). The items table as docs/data-model.md has it, schedule as jsonb. /items lists active items, /items/new and /items/<id> share one form so add and edit cannot validate differently, delete sits on the item page so a mistap cannot reach it.\n\nkind is derived from the schedule, not asked for: the four schedule types already split habits from chores. Every field is validated server-side, and the weekday range now lives once in dates.ts so the form refuses exactly what the read-time guard would throw on. A refused save hands back what was typed, because React empties an uncontrolled form as soon as its action returns.\n\nSecond migration track laid here too: drizzle-kit generates, scripts/migrate.mjs applies with drizzle-orm, next.config drags both into the standalone image, container CMD runs auth first. docs/stack.md explains it. /items is force-dynamic because the build image has no database.\n\nLeft for other cards: no session check yet (sign-in card 0a4a0fb1 — there is a ponytail: note where it goes); hard delete rather than archive (card efd1ae35); no checkins table, so nothing reads dueItems yet."
             }
           ]
         },
@@ -169,19 +252,33 @@
           "comments": [
             {
               "at": "2026-09-18T12:33:11.141Z",
-              "body": "Shipped in PR #4 (today-view-with-one-tap-check-off). The home page is now Today: overdue chores first and riper first, then the habits due today, then what is already done, ties by name so the list does not reshuffle under a thumb. The whole row is the button. The note belongs to the check-in, so it only shows once the item is done, folded away where it cannot sit between a thumb and the row.\n\nNew underneath: the checkins table with UNIQUE(item_id, local_date), which is what makes a tap idempotent and what will make an offline replay safe. src/lib/today.ts decides the list, because dueItems alone is not it \u2014 an interval chore leaves that list the day it is done, so a mistap would take its own row off the screen. dates.ts now exports dueContexts so the chore hint and the due filter read one derivation of last-done.\n\nThe day comes from the server clock and the timezone setting, never from the form. Timezone is the TIMEZONE environment variable until the settings page (card 0ac962d4) holds it; one function to swap.\n\nLeft for the cards that own it: offline check-offs wait on the PWA outbox (fdd1c45f) \u2014 a tap is a server action and needs the network today; the green-to-red chore hint is card c5d5c10b, which this ordering already feeds; points are shown per row but nothing sums them until the ledger (a871063d)."
+              "body": "Shipped in PR #4 (today-view-with-one-tap-check-off). The home page is now Today: overdue chores first and riper first, then the habits due today, then what is already done, ties by name so the list does not reshuffle under a thumb. The whole row is the button. The note belongs to the check-in, so it only shows once the item is done, folded away where it cannot sit between a thumb and the row.\n\nNew underneath: the checkins table with UNIQUE(item_id, local_date), which is what makes a tap idempotent and what will make an offline replay safe. src/lib/today.ts decides the list, because dueItems alone is not it — an interval chore leaves that list the day it is done, so a mistap would take its own row off the screen. dates.ts now exports dueContexts so the chore hint and the due filter read one derivation of last-done.\n\nThe day comes from the server clock and the timezone setting, never from the form. Timezone is the TIMEZONE environment variable until the settings page (card 0ac962d4) holds it; one function to swap.\n\nLeft for the cards that own it: offline check-offs wait on the PWA outbox (fdd1c45f) — a tap is a server action and needs the network today; the green-to-red chore hint is card c5d5c10b, which this ordering already feeds; points are shown per row but nothing sums them until the ledger (a871063d)."
             }
           ]
         },
         {
           "id": "a871063d-4cf5-496b-ad59-bdd5d05e22bc",
           "title": "Points ledger and daily bonus",
-          "notes": "Ready in PR #5 (points-ledger-and-daily-bonus). New `ledger` table, one row per day: item_points plus a 5-point bonus when everything owed that day is done. Owed is requiredItems, not dueItems, so a per_week habit only costs the bonus once the count left no longer fits in the days left.\n\nThe row is written inside toggleCheckIn, so the offline replay and the undo get it for free. Item writes rewrite today's row and only today's \u2014 yesterday keeps what it paid. Archived items keep the points of the days they were done and stop being owed.\n\nToday's header shows what the day earned, read from the ledger. Migration drizzle/0002_serious_paper_doll.sql.",
+          "notes": "Ready in PR #5 (points-ledger-and-daily-bonus). New `ledger` table, one row per day: item_points plus a 5-point bonus when everything owed that day is done. Owed is requiredItems, not dueItems, so a per_week habit only costs the bonus once the count left no longer fits in the days left.\n\nThe row is written inside toggleCheckIn, so the offline replay and the undo get it for free. Item writes rewrite today's row and only today's — yesterday keeps what it paid. Archived items keep the points of the days they were done and stop being owed.\n\nToday's header shows what the day earned, read from the ledger. Migration drizzle/0002_serious_paper_doll.sql.",
           "priority": "high",
           "parent": null,
           "updatedAt": "2026-09-18T13:21:00.784Z",
           "branch": "points-ledger-and-daily-bonus",
           "pullRequest": 5
+        },
+        {
+          "id": "4ece4621-b1a8-4544-98c4-c657f38af915",
+          "title": "Undo a check-off",
+          "notes": "Tap again within the day removes the check-in and rewrites that day's ledger row.",
+          "priority": "medium",
+          "parent": null,
+          "updatedAt": "2026-09-20T12:27:32.259Z",
+          "comments": [
+            {
+              "at": "2026-09-20T12:27:32.237Z",
+              "body": "Already shipped. toggleCheckIn deletes the day's row when one is there and inserts when it is not, so the second tap takes the check-off back; toggleToday then calls writeLedgerDay, which rewrites that day's points and bonus. Nothing left to build."
+            }
+          ]
         }
       ]
     }
