@@ -201,7 +201,33 @@
     },
     {
       "name": "Doing",
-      "cards": []
+      "cards": [
+        {
+          "id": "60d9f348-1d43-4fe2-98dc-e73671679238",
+          "title": "Style the sign-in and passkey pages",
+          "notes": "The starter's sign-in, sign-in error and passkey pages render with Tailwind's reset and no app styles: invisible email box, buttons that look like plain text. Style them through the starter's classNames prop to match the item form.",
+          "priority": "medium",
+          "parent": null,
+          "createdAt": "2026-10-03T11:08:00.739Z",
+          "updatedAt": "2026-10-03T11:25:57.884Z",
+          "branch": "style-auth-pages",
+          "pullRequest": 6,
+          "comments": [
+            {
+              "at": "2026-10-03T11:11:08.486Z",
+              "body": "Shipped in PR #6. Sign-in, sign-in error and add-passkey pages styled via the starter's classNames. Item form's field, label, button and alert classes now live in src/app/control-styles.ts, shared with the auth pages."
+            },
+            {
+              "at": "2026-10-03T11:15:27.691Z",
+              "body": "Reworked in PR #6: sign-in is now passkey-first with the app name and icon, magic link folded behind a tap."
+            },
+            {
+              "at": "2026-10-03T11:20:05.937Z",
+              "body": "Passkey-first redo reverted. Sign-in now sits in a card over a tinted habit-grid backdrop. PR #6 updated."
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Review",
@@ -286,31 +312,6 @@
             {
               "at": "2026-09-20T12:27:32.237Z",
               "body": "Already shipped. toggleCheckIn deletes the day's row when one is there and inserts when it is not, so the second tap takes the check-off back; toggleToday then calls writeLedgerDay, which rewrites that day's points and bonus. Nothing left to build."
-            }
-          ]
-        },
-        {
-          "id": "60d9f348-1d43-4fe2-98dc-e73671679238",
-          "title": "Style the sign-in and passkey pages",
-          "notes": "The starter's sign-in, sign-in error and passkey pages render with Tailwind's reset and no app styles: invisible email box, buttons that look like plain text. Style them through the starter's classNames prop to match the item form.",
-          "priority": "medium",
-          "parent": null,
-          "createdAt": "2026-10-03T11:08:00.739Z",
-          "updatedAt": "2026-10-03T11:20:05.937Z",
-          "branch": "style-auth-pages",
-          "pullRequest": 6,
-          "comments": [
-            {
-              "at": "2026-10-03T11:11:08.486Z",
-              "body": "Shipped in PR #6. Sign-in, sign-in error and add-passkey pages styled via the starter's classNames. Item form's field, label, button and alert classes now live in src/app/control-styles.ts, shared with the auth pages."
-            },
-            {
-              "at": "2026-10-03T11:15:27.691Z",
-              "body": "Reworked in PR #6: sign-in is now passkey-first with the app name and icon, magic link folded behind a tap."
-            },
-            {
-              "at": "2026-10-03T11:20:05.937Z",
-              "body": "Passkey-first redo reverted. Sign-in now sits in a card over a tinted habit-grid backdrop. PR #6 updated."
             }
           ]
         }

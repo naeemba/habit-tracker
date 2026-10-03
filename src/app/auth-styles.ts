@@ -1,47 +1,54 @@
-// The starter's auth pages ship with bare inline styles, and Tailwind's reset
-// strips the browser's borders, so unstyled they show an invisible email box
-// and buttons that read as plain text. These match the item form's controls.
+// The starter's auth forms draw their own buttons and inputs and take only
+// class names, so they wear shadcn's styles as strings rather than its
+// components. Sized up from shadcn's defaults so each control is a thumb's
+// width on a phone.
 
-import { errorClassName, fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/app/control-styles"
+import { buttonVariants } from "@/components/ui/button"
+import { inputClassName } from "@/components/ui/input"
+import { labelClassName } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 
-// Full-page layout for the signed-in passkey page, which has no backdrop.
-const main = "mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 p-4"
-// The sign-in pages sit on the layout's tinted backdrop; this is the card on it.
-const card = "relative flex w-full max-w-sm flex-col gap-6 rounded-2xl border border-black/5 bg-white p-6 shadow-xl shadow-indigo-950/10 dark:border-white/10 dark:bg-neutral-900"
-const heading = "text-2xl font-semibold tracking-tight"
+const primaryButton = cn(buttonVariants({ size: "lg" }), "h-11 w-full text-base")
+const outlineButton = cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 w-full text-base")
 const root = "flex flex-col gap-4"
-const success = "rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800 dark:bg-green-950 dark:text-green-300"
+const error = "rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+const success = "rounded-lg bg-muted px-3 py-2 text-sm"
 
-export const signInClassNames = {
-  main: card,
-  heading,
+// Sign-in and its error page sit inside the layout's Card, so their own
+// wrapper only lays out what is in it.
+export const insideCard = root
+export const cardHeading = "font-heading text-lg font-medium"
+
+export const signInFormClassNames = {
   root,
-  passkeyButton: primaryButtonClassName,
+  passkeyButton: primaryButton,
   divider: "flex items-center gap-3",
-  dividerLine: "h-px flex-1 bg-black/10 dark:bg-white/15",
-  dividerLabel: "text-sm opacity-60",
-  emailLabel: labelClassName,
-  emailInput: fieldClassName,
+  dividerLine: "h-px flex-1 bg-border",
+  dividerLabel: "text-xs text-muted-foreground",
+  emailLabel: cn(labelClassName, "mb-2"),
+  emailInput: cn(inputClassName, "h-11 text-base md:text-base"),
   // The label, input and button sit in their own <form>, out of reach of the
   // root's gap, so the button carries its own spacing.
-  submitButton: `${secondaryButtonClassName} mt-3`,
-  error: errorClassName,
+  submitButton: cn(outlineButton, "mt-3"),
+  error,
   sentMessage: success,
 }
 
 export const signInErrorClassNames = {
-  main: card,
-  heading,
-  message: "text-base opacity-80",
-  link: `${secondaryButtonClassName} block text-center`,
+  main: insideCard,
+  heading: cardHeading,
+  message: "text-sm text-muted-foreground",
+  link: outlineButton,
 }
 
+// The passkey page is reached signed in, has no backdrop, and follows the
+// phone's light or dark setting.
 export const passkeyManagerClassNames = {
-  main,
-  heading,
-  description: "text-sm opacity-70",
+  main: "mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 p-4",
+  heading: "text-2xl font-semibold tracking-tight",
+  description: "text-sm text-muted-foreground",
   root,
-  button: primaryButtonClassName,
+  button: primaryButton,
   success,
-  error: errorClassName,
+  error,
 }
