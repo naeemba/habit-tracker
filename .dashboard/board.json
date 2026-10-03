@@ -296,7 +296,7 @@
           "priority": "medium",
           "parent": null,
           "createdAt": "2026-10-03T11:08:00.739Z",
-          "updatedAt": "2026-10-03T11:15:27.691Z",
+          "updatedAt": "2026-10-03T11:20:05.937Z",
           "branch": "style-auth-pages",
           "pullRequest": 6,
           "comments": [
@@ -307,6 +307,10 @@
             {
               "at": "2026-10-03T11:15:27.691Z",
               "body": "Reworked in PR #6: sign-in is now passkey-first with the app name and icon, magic link folded behind a tap."
+            },
+            {
+              "at": "2026-10-03T11:20:05.937Z",
+              "body": "Passkey-first redo reverted. Sign-in now sits in a card over a tinted habit-grid backdrop. PR #6 updated."
             }
           ]
         }
