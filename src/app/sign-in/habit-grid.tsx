@@ -28,7 +28,7 @@ export function HabitGrid() {
   return (
     <svg
       aria-hidden
-      className="pointer-events-none absolute inset-0 h-full w-full opacity-20 text-violet-300"
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-10 text-violet-300"
       style={{
         maskImage: "radial-gradient(ellipse at center, transparent 20%, black 75%)",
       }}
