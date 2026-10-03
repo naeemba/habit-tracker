@@ -183,6 +183,15 @@
           "parent": null,
           "createdAt": "2026-09-20T12:29:05.279Z",
           "updatedAt": "2026-09-20T12:29:05.279Z"
+        },
+        {
+          "id": "cb812794-51dc-41bb-9a87-f22720a7fd34",
+          "title": "Sign-in error page flashes the wrong message",
+          "notes": "Open /sign-in/error?error=EXPIRED_TOKEN in dev: the server renders the generic \"We couldn't sign you in\" text, the browser then shows \"This sign-in link has expired\", and React logs a hydration mismatch (red Next.js issue badge). The starter's SignInErrorPage reads the error code from window.location only in the browser. Fix in the starter (read searchParams on the server, or render after mount), or pass the code in from this app's page via searchParams.",
+          "priority": "low",
+          "parent": null,
+          "createdAt": "2026-10-03T11:19:08.834Z",
+          "updatedAt": "2026-10-03T11:19:08.834Z"
         }
       ]
     },
@@ -192,7 +201,33 @@
     },
     {
       "name": "Doing",
-      "cards": []
+      "cards": [
+        {
+          "id": "60d9f348-1d43-4fe2-98dc-e73671679238",
+          "title": "Style the sign-in and passkey pages",
+          "notes": "The starter's sign-in, sign-in error and passkey pages render with Tailwind's reset and no app styles: invisible email box, buttons that look like plain text. Style them through the starter's classNames prop to match the item form.",
+          "priority": "medium",
+          "parent": null,
+          "createdAt": "2026-10-03T11:08:00.739Z",
+          "updatedAt": "2026-10-03T11:25:57.884Z",
+          "branch": "style-auth-pages",
+          "pullRequest": 6,
+          "comments": [
+            {
+              "at": "2026-10-03T11:11:08.486Z",
+              "body": "Shipped in PR #6. Sign-in, sign-in error and add-passkey pages styled via the starter's classNames. Item form's field, label, button and alert classes now live in src/app/control-styles.ts, shared with the auth pages."
+            },
+            {
+              "at": "2026-10-03T11:15:27.691Z",
+              "body": "Reworked in PR #6: sign-in is now passkey-first with the app name and icon, magic link folded behind a tap."
+            },
+            {
+              "at": "2026-10-03T11:20:05.937Z",
+              "body": "Passkey-first redo reverted. Sign-in now sits in a card over a tinted habit-grid backdrop. PR #6 updated."
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Review",

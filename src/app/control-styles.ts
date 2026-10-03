@@ -1,0 +1,6 @@
+// Form controls for the item form. The auth pages use shadcn; see auth-styles.ts.
+
+export const fieldClassName = "w-full rounded-lg border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 text-base"
+export const labelClassName = "block text-sm font-medium mb-1"
+export const primaryButtonClassName = "w-full rounded-lg bg-foreground px-4 py-3 text-base font-medium text-background disabled:opacity-50"
+export const errorClassName = "rounded-lg bg-red-50 dark:bg-red-950 px-3 py-2 text-sm text-red-700 dark:text-red-300"
