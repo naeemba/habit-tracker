@@ -1,5 +1,6 @@
 import { SignInPage } from "@naeemba/next-starter/pages/sign-in"
 import { authClient } from "@/lib/auth-client"
+import { signInClassNames } from "@/app/auth-styles"
 
 export default function Page() {
   return (
@@ -7,6 +8,7 @@ export default function Page() {
       authClient={authClient}
       errorCallbackUrl="/sign-in/error"
       passkey
+      classNames={signInClassNames}
     />
   )
 }

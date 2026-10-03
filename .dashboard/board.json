@@ -192,7 +192,17 @@
     },
     {
       "name": "Doing",
-      "cards": []
+      "cards": [
+        {
+          "id": "60d9f348-1d43-4fe2-98dc-e73671679238",
+          "title": "Style the sign-in and passkey pages",
+          "notes": "The starter's sign-in, sign-in error and passkey pages render with Tailwind's reset and no app styles: invisible email box, buttons that look like plain text. Style them through the starter's classNames prop to match the item form.",
+          "priority": "medium",
+          "parent": null,
+          "createdAt": "2026-10-03T11:08:00.739Z",
+          "updatedAt": "2026-10-03T11:08:00.739Z"
+        }
+      ]
     },
     {
       "name": "Review",
