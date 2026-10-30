@@ -1,12 +1,11 @@
 "use client"
 
 import { useActionState } from "react"
+import { errorClassName, fieldClassName, labelClassName, primaryButtonClassName } from "@/app/control-styles"
 import { WEEKDAY_NAMES } from "@/lib/items"
 import type { Item } from "@/lib/schema/items"
 import { saveItem, type SaveResult } from "./actions"
 
-const fieldClassName = "w-full rounded-lg border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 text-base"
-const labelClassName = "block text-sm font-medium mb-1"
 
 /**
  * The add form and the edit form are the same form; `item` is what makes it an
@@ -42,7 +41,7 @@ export function ItemForm({ item }: { item?: Item }) {
     // the message means two tries that fail the same way still redraw.
     <form key={result?.attempt ?? 0} action={action} className="space-y-4">
       {result && (
-        <p role="alert" className="rounded-lg bg-red-50 dark:bg-red-950 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+        <p role="alert" className={errorClassName}>
           {result.error}
         </p>
       )}
@@ -125,7 +124,7 @@ export function ItemForm({ item }: { item?: Item }) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-foreground px-4 py-3 text-base font-medium text-background disabled:opacity-50"
+        className={primaryButtonClassName}
       >
         {pending ? "Saving…" : item ? "Save changes" : "Add item"}
       </button>
