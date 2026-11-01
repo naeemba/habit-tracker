@@ -95,6 +95,18 @@ database, only the placeholder `DATABASE_URL`. `/items` sets
 `export const dynamic = "force-dynamic"` for that reason, and so must every
 page added later that reads at render time.
 
+## Held versions and overrides
+
+`package.json` cannot carry comments, so the reasons live here. Read this
+before bumping anything; each entry says what would let it go.
+
+| Entry | Why | Drop or bump when |
+|---|---|---|
+| `typescript` held at `~6.0.3` | typescript-eslint accepts `<6.1.0`; on TS 7 lint stops with `typescript-eslint does not support TS 7.0` | typescript-eslint supports TS 7 |
+| `@types/node` held at `^22` | The image runs `node:22-alpine`. Newer types let code compile against APIs that throw `is not a function` in the container, and nothing in tsc, lint, tests or the build catches it | The `Dockerfile` base image moves to a newer Node; bump both together |
+| Override `@esbuild-kit/core-utils` → `esbuild ^0.25.12` | drizzle-kit 0.31 still pulls `@esbuild-kit/core-utils`, which pins `esbuild ~0.18.20` ([GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99)) | drizzle-kit ships without `@esbuild-kit/core-utils` (1.0) |
+| Override `minimatch@^10` → `^11.0.3` | eslint 10 and typescript-eslint 8 ask for `^10.2.x`, and no 10.x release fixes [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | eslint and typescript-eslint depend on minimatch 11 themselves |
+
 ## Libraries to add
 
 | Need | Library |
