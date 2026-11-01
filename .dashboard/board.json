@@ -183,6 +183,12 @@
           "parent": null,
           "createdAt": "2026-09-20T12:29:05.279Z",
           "updatedAt": "2026-09-20T12:29:05.279Z"
+        },
+        {
+          "id": "42c669fb-5449-4f7b-931a-75fb0f542694",
+          "title": "Magic-link sign-in 500s: @react-email/render is not installed",
+          "notes": "Tap \"Send magic link\" on /sign-in, then the starter's sendMagicLink lazy-imports its default template, which needs @react-email/render. It throws \"Optional peer '@react-email/render' is not installed\" before any transport runs, so it fails with or without RESEND_API_KEY, and the console fallback never prints a link. Cost: on a device with no passkey registered there is no way to sign in. next.config.ts wrongly lists both @react-email packages in optionalPeers as not needed. Fix: add @react-email/render and @react-email/components to dependencies and take them out of optionalPeers, or turn the magic-link plugin off if passkey-only is the decision.\n\nIssue: https://github.com/naeemba/habit-tracker/issues/8\nReview: https://github.com/naeemba/habit-tracker/pull/7#discussion_r4435837997",
+          "priority": "high"
         }
       ]
     },
