@@ -23,6 +23,8 @@ an alternative.
   `docs/stack.md`. Deploys on Coolify as app container plus Postgres service.
 - No secrets in committed files. Read from environment, document names
   in `.env.example`.
+- Before bumping a dependency, read "Held versions and overrides" in
+  `docs/stack.md`. Two versions are held and two overrides are deliberate.
 - Work is tracked in `.dashboard/board.json`. Move a card to Doing before
   the first edit, to Done when the PR is ready.
 - No semicolons in TypeScript or config files. Nothing enforces it yet; add
