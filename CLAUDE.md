@@ -1,9 +1,15 @@
 # Habit Tracker
 
+Feature docs live in `docs/`; a change to a feature's files changes its docs
+in the same PR. `docs/README.md` is the index. Each rule below names the id of
+the entry saying what breaking it looked like, in
+`docs/<feature>/hard-rules.md`; settled questions are in each feature's
+`decisions.md`. Read the entry before arguing with a rule.
+
 Personal habit and chore tracker with points toward a reward. Read
 `README.md` for the full feature list; it is the source of truth for scope.
 `docs/data-model.md` is the source of truth for tables and schedule
-shapes. `docs/stack.md` records the stack choice and why. `docs/research.md` holds the formulas (strength score, dueness)
+shapes. `docs/deployment/decisions.md` records the stack choice and why. `docs/research.md` holds the formulas (strength score, dueness)
 and the platform limits (iOS push, offline). Check it before inventing
 an alternative.
 
@@ -14,30 +20,33 @@ an alternative.
 - Chores use "every N days since last done". Habits use a fixed schedule.
   Do not merge the two into one schedule type.
 - A missed day costs only the daily bonus. Never subtract earned points.
+  (points-rule-1)
 - Everything on the Today view must work with one tap on a phone.
 - Offline first: a check-off must succeed without network and sync later.
 
 ## Engineering rules
 
 - Stack: Next.js on `@naeemba/next-starter` with Postgres. See
-  `docs/stack.md`. Deploys on Coolify as app container plus Postgres service.
+  `docs/deployment/`. Deploys on Coolify as app container plus Postgres service.
 - No secrets in committed files. Read from environment, document names
   in `.env.example`.
 - Before bumping a dependency, read "Held versions and overrides" in
-  `docs/stack.md`. Two versions are held and two overrides are deliberate.
+  `docs/deployment/README.md`. Two versions are held and two overrides are
+  deliberate. (deployment-rule-4)
 - Work is tracked in `.dashboard/board.json`. Move a card to Doing before
   the first edit, to Done when the PR is ready.
 - No semicolons in TypeScript or config files. Nothing enforces it yet; add
   Prettier with `"semi": false` when the repo gets a CI job to hang it on.
+  (conventions-rule-3)
 - `allowImportingTsExtensions` is on so `node --test` can resolve
   `./dates.ts`. Modules under `src/lib` that a test imports need the `.ts`
   extension on their own relative imports too — Node resolves the whole chain,
   not just the entry. `next build` and the Docker build both handle that.
   Nothing under `src/app` may use it: it compiles and then breaks at
-  `next build`.
+  `next build`. (conventions-rule-1)
 - Every relative import inside `src/lib` carries the `.ts` extension, whether a
   test reaches it or not. Two spellings in one folder drift, and the next
-  person copies whichever file they opened first.
+  person copies whichever file they opened first. (conventions-rule-2)
 - A check-in and its ledger row are not written atomically. `toggleToday` runs
   `toggleCheckIn` and then `writeLedgerDay` as two commits, so a crash between
   them leaves that day checked off but unpaid, and only a later tap on the same

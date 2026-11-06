@@ -111,7 +111,7 @@ Source: [Habit tracker schema notes](https://terminalskills.io/use-cases/build-h
 ## 7. Coolify deployment
 
 Original plan was one container with SQLite on a volume. Superseded by the
-stack decision (`docs/stack.md`): app container plus Coolify's Postgres
+stack decision (`docs/deployment/decisions.md`): app container plus Coolify's Postgres
 service. Still one Dockerfile, non-root user, port and domain set in Coolify.
 
 Sources: [Coolify persistent storage](https://coolify.io/docs/knowledge-base/persistent-storage),
