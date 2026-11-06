@@ -1,21 +1,18 @@
-# Stack Decision
+# Deployment: decisions
 
-Decided 2026-09-16. Scaffolded 2026-09-16.
+Settled questions. Read the entry before re-litigating it.
 
-## Choice
+## deployment-decision-1: Next.js, not SvelteKit
 
 Next.js on top of `@naeemba/next-starter`
 (`~/workspace/personal/next-typescript-starter`, published as a versioned npm
-package). Postgres as the database.
+package), with Postgres as the database. SvelteKit ships less JavaScript to the
+phone (roughly 15 KB runtime versus 90 KB), but on a modern Android phone the
+difference is not noticeable. Existing Next projects, Coolify setups, and agent
+rules already exist for Next. Familiarity wins for a personal app maintained
+for years. (2026-09-16, decided and scaffolded the same day, #1)
 
-## Why Next over SvelteKit
-
-SvelteKit ships less JavaScript to the phone (roughly 15 KB runtime versus
-90 KB), but on a modern Android phone the difference is not noticeable.
-Existing Next projects, Coolify setups, and agent rules already exist for
-Next. Familiarity wins for a personal app maintained for years.
-
-## Why the starter
+## deployment-decision-2: Build on the starter
 
 | Starter piece | What it replaces |
 |---|---|
@@ -25,89 +22,51 @@ Next. Familiarity wins for a personal app maintained for years.
 | Drizzle ORM and migrations | Same ORM planned anyway |
 | Next 16, React 19 | Current versions |
 
-## What the starter forces
+What it does not give is written here instead: the Dockerfile, the file-tracer
+include lists and the migrate step (see the [README](README.md)), and the PWA
+and push libraries ([deployment-decision-7](#deployment-decision-7-libraries-for-what-is-not-built-yet)).
+(2026-09-16, #1)
 
-- **Postgres, not SQLite.** The starter's driver, `DATABASE_URL`, and
-  migrations are Postgres-only. Coolify runs Postgres as a one-click service,
-  so the deploy is two containers: app and database. Coolify's backup feature
-  covers the database.
-- `docs/data-model.md` stays as written; only column types change
-  (`text` for uuid becomes `uuid`, dates stay `date`/`timestamptz`).
+## deployment-decision-3: Postgres, not SQLite
 
-## What the starter does not give
+The starter forces it: its driver, `DATABASE_URL`, and migrations are
+Postgres-only. Coolify runs Postgres as a one-click service, so the deploy is
+two containers, app and database, and Coolify's backup feature covers the
+database. This supersedes the original plan of one container with SQLite on a
+volume ([research notes](../research.md) section 7); it is still one
+Dockerfile, non-root user, port and domain set in Coolify.
+[data-model.md](../data-model.md) stays as written; only column types change
+(`text` for uuid becomes `uuid`, dates stay `date`/`timestamptz`). (2026-09-16,
+#1)
 
-- No Dockerfile. Written, with Next standalone output and a non-root user.
-- No PWA, service worker, or Web Push. Add `serwist` and `web-push`.
-- Passkeys need HTTPS and a stable domain. Fine on Coolify; use `localhost`
-  in development.
-- Two things the starter does not handle for a containerised deploy, both
-  worked around here and both better fixed upstream:
-  - Its optional peers are loaded in ways the bundler cannot see, so
-    `output: "standalone"` does not trace them. `next.config.ts` walks
-    their dependency tree and feeds it to the tracer. Without that the
-    container boots and then fails on the first sign-in request. The
-    starter should export these globs itself, next to the hidden imports.
-  - `createAuth()` validates its environment at import time, and
-    `next build` imports it while collecting route config, so a build with
-    no secrets fails. The `Dockerfile` sets throwaway values in the builder
-    stage. The starter should skip validation when `NEXT_PHASE` says it is
-    a production build.
+## deployment-decision-4: The container migrates, not a `prestart` script
 
-## Migrations on deploy
+The starter's README prescribes a `prestart` npm script. A standalone image runs
+`node server.js` and never goes through npm, so the container's `CMD` runs
+`next-starter migrate`, then the app's own track, then the server. (2026-09-16,
+#1)
 
-The starter's README prescribes a `prestart` npm script for the auth
-migrations. A standalone image runs `node server.js` directly and never goes
-through npm, so the hook would never fire. The container's `CMD` runs
-`next-starter migrate` before the server instead. Two consequences worth
-knowing:
+## deployment-decision-5: The app migrates with drizzle-orm's migrator
 
-- The CLI has to be *in* the image, and nothing in app code imports it, so
-  `@naeemba/next-starter` is on the `runtimePeers` list in `next.config.ts`
-  purely to drag `bin/` and `migrations/` through the file tracer.
-- `DATABASE_URL` must be set at container start, not just at build. Coolify
-  supplies it from the Postgres service; `docker-compose.yml` does the same
-  and waits on the database's healthcheck.
+The starter owns the auth tables and its CLI has no extension point, so this
+app's tables get their own track: `drizzle-kit generate` writes the SQL,
+`scripts/migrate.mjs` applies it with drizzle-orm's migrator. drizzle-kit is a
+dev dependency and carries esbuild with it, so it is not in the production
+image; drizzle-orm already is, because the closure drags it in. (2026-09-16, #3)
 
-Without this the first deploy against an empty database looks healthy — `/`
-returns 200 — and then the first sign-in fails with `relation "user" does not
-exist`, with no CLI on disk to fix it by hand.
+## deployment-decision-6: Hold two versions, override two packages
 
-### Two tracks, not one
+When every dependency moved to its latest version, `typescript` stayed on the
+6.0 line and `@types/node` on 22, and `esbuild` under
+`@esbuild-kit/core-utils` and `minimatch@^10` were overridden. The reasons and
+the condition for dropping each are in the
+[held versions table](README.md#held-versions-and-overrides). The lockfile was
+regenerated, because the old one pinned better-call 1.4.0, which
+`@better-auth/passkey` 1.7.15's exact peer `1.4.4` refuses. (2026-11-01, #7)
 
-The starter owns the auth tables and journals them in
-`__next_starter_migrations`. This app's own tables are a second, independent
-track: `drizzle.config.ts` and `drizzle-kit generate` write the SQL into
-`drizzle/`, and `scripts/migrate.mjs` applies it. The container's `CMD` runs
-the auth track first, then this one, then the server.
+## deployment-decision-7: Libraries for what is not built yet
 
-- The script uses drizzle-orm's migrator rather than drizzle-kit. drizzle-kit
-  is a dev dependency and carries esbuild with it, so it is not in the
-  production image; drizzle-orm already is, because the closure drags it in.
-- `drizzle/` and `scripts/migrate.mjs` are on their own include list in
-  `next.config.ts`. No route imports either one, so the file tracer never sees
-  them, and an image without them repeats the trap one track along: `/` returns
-  200 and the first items page dies on `relation "items" does not exist`.
-- Locally, `npm run db:generate` after a schema change and `npm run db:migrate`
-  to apply both tracks.
-
-Pages that read these tables cannot be prerendered: the build image has no
-database, only the placeholder `DATABASE_URL`. `/items` sets
-`export const dynamic = "force-dynamic"` for that reason, and so must every
-page added later that reads at render time.
-
-## Held versions and overrides
-
-`package.json` cannot carry comments, so the reasons live here. Read this
-before bumping anything; each entry says what would let it go.
-
-| Entry | Why | Drop or bump when |
-|---|---|---|
-| `typescript` held at `~6.0.3` | typescript-eslint accepts `<6.1.0`; on TS 7 lint stops with `typescript-eslint does not support TS 7.0` | typescript-eslint supports TS 7 |
-| `@types/node` held at `^22` | The image runs `node:22-alpine`. Newer types let code compile against APIs that throw `is not a function` in the container, and nothing in tsc, lint, tests or the build catches it | The `Dockerfile` base image moves to a newer Node; bump both together |
-| Override `@esbuild-kit/core-utils` → `esbuild ^0.25.12` | drizzle-kit 0.31 still pulls `@esbuild-kit/core-utils`, which pins `esbuild ~0.18.20` ([GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99)) | drizzle-kit ships without `@esbuild-kit/core-utils` (1.0) |
-| Override `minimatch@^10` → `^11.0.3` | eslint 10 and typescript-eslint 8 ask for `^10.2.x`, and no 10.x release fixes [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | eslint and typescript-eslint depend on minimatch 11 themselves |
-
-## Libraries to add
+The starter has no PWA, service worker, or Web Push. When those land:
 
 | Need | Library |
 |---|---|
@@ -115,3 +74,5 @@ before bumping anything; each entry says what would let it go.
 | Push reminders | `web-push` (VAPID) |
 | Offline outbox | IndexedDB via `idb`, or plain IndexedDB |
 | Reminder scheduler | In-process interval in the Node server, checked every minute |
+
+(2026-09-16)
