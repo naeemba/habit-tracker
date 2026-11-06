@@ -81,11 +81,13 @@ docker compose up -d --build  # http://localhost:3000
 
 ## Documents
 
+- [Feature docs](docs/README.md) — one folder per feature: what it does, its
+  files, its rules and decisions.
 - [Research notes](docs/research.md) — what other apps do and the decisions taken.
-- [Stack decision](docs/stack.md) — Next.js on next-starter, Postgres, what to add.
+- [Stack decision](docs/deployment/decisions.md) — Next.js on next-starter, Postgres, what to add.
 - [Data model](docs/data-model.md) — tables, schedule shapes, derived values.
 - Work board: `.dashboard/board.json`.
 
 ## Deployment
 
-App container plus Postgres service on Coolify. See [docs/stack.md](docs/stack.md).
+App container plus Postgres service on Coolify. See [docs/deployment/](docs/deployment/README.md).
