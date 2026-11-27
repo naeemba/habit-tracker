@@ -16,11 +16,11 @@
     "db:generate": "node --env-file-if-exists=.env node_modules/.bin/drizzle-kit generate"
   },
   "dependencies": {
-    "@better-auth/passkey": "^1.7.15",
-    "@naeemba/next-starter": "^0.13.2",
+    "@better-auth/passkey": "^1.7.28",
+    "@naeemba/next-starter": "^0.13.3",
     "drizzle-orm": "^0.45.4",
-    "next": "16.4.3",
-    "postgres": "^4.0.0",
+    "next": "16.4.6",
+    "postgres": "^4.1.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -30,8 +30,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.11",
-    "eslint": "^10.14.0",
-    "eslint-config-next": "16.4.3",
+    "eslint": "^10.16.0",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "~6.0.3"
   },
